@@ -1,0 +1,10 @@
+{
+  "at": "2026-09-12T11:39:15.364Z",
+  "migration": "015_cleanup_conflict_target.sql",
+  "checks": [
+    "Authenticated client cannot claim privileged cleanup jobs",
+    "Deleting ticket removes metadata and enqueues its image",
+    "Temporary Storage failure records a retry with backoff",
+    "Worker retry removes the actual private object and finishes job"
+  ]
+}

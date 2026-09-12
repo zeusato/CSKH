@@ -1,0 +1,71 @@
+{
+  "at": "2026-09-12T11:49:43.213Z",
+  "auth": {
+    "signupDisabled": true,
+    "customSmtpConfigured": false,
+    "siteUrl": "http://localhost:5173"
+  },
+  "functions": [
+    {
+      "name": "admin-users",
+      "status": "ACTIVE"
+    },
+    {
+      "name": "storage-cleanup",
+      "status": "ACTIVE"
+    }
+  ],
+  "database": [
+    {
+      "state": {
+        "tickets": 0,
+        "profiles": 1,
+        "migrations": 16,
+        "attachments": 0,
+        "pendingCleanup": 0,
+        "storageObjects": 0,
+        "cleanupSchedule": [
+          {
+            "name": "cskh-storage-cleanup",
+            "active": true,
+            "schedule": "* * * * *"
+          }
+        ],
+        "recentCleanupRuns": [
+          {
+            "ended": "2026-09-12T11:49:00.023794+00:00",
+            "status": "succeeded"
+          },
+          {
+            "ended": "2026-09-12T11:48:00.045276+00:00",
+            "status": "succeeded"
+          },
+          {
+            "ended": "2026-09-12T11:47:00.048279+00:00",
+            "status": "succeeded"
+          }
+        ]
+      }
+    }
+  ],
+  "recentScheduledHttpResponses": [
+    {
+      "status_code": 200,
+      "timed_out": false,
+      "error_msg": null,
+      "created": "2026-09-12 11:49:00.023747+00"
+    },
+    {
+      "status_code": 200,
+      "timed_out": false,
+      "error_msg": null,
+      "created": "2026-09-12 11:48:00.046526+00"
+    },
+    {
+      "status_code": 200,
+      "timed_out": false,
+      "error_msg": null,
+      "created": "2026-09-12 11:47:00.048232+00"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+[functions.admin-users]
+verify_jwt = false
+
+[functions.storage-cleanup]
+verify_jwt = false
+# Both handlers explicitly verify session tokens via auth.getUser and current DB membership.
+# The cleanup handler additionally accepts the dedicated secret held in Vault by pg_cron.

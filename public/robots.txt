@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Public branding may be fetched for link previews.
+# Application HTML carries noindex; ticket contents require authentication.

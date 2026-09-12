@@ -1,0 +1,20 @@
+{
+  "at": "2026-09-12T10:21:28.775Z",
+  "passed": [
+    "Anonymous cannot read tickets",
+    "User cannot change own role",
+    "User cannot create systems",
+    "Server assigns code, actor and timestamps",
+    "Accent-insensitive search with User RLS",
+    "User cannot delete category",
+    "Admin cannot delete referenced category",
+    "Reject mismatched staff and department",
+    "Completion and reopen timestamps",
+    "Optimistic concurrency rejects stale version",
+    "Private images upload and signed read",
+    "Locked member loses DB and Storage access with existing JWT",
+    "User cannot call account administration Edge Function",
+    "Admin can list accounts through Edge Function",
+    "User deletes ticket; cleanup removes object"
+  ]
+}

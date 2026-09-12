@@ -1,0 +1,18 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {build} from 'vite';
+import {createClient} from '@supabase/supabase-js';
+await fs.mkdir('.local/pdf-check',{recursive:true});
+await build({configFile:false,publicDir:false,logLevel:'error',build:{ssr:'src/lib/export-pdf.ts',outDir:'.local/pdf-check',emptyOutDir:false,rollupOptions:{output:{format:'cjs',entryFileNames:'export-pdf.cjs'}}}});
+const originalFetch=globalThis.fetch;
+globalThis.fetch=async(input,options)=>typeof input==='string'&&input.startsWith('/')?new Response(await fs.readFile(path.join(process.cwd(),'public',input.slice(1)))):originalFetch(input,options);
+const state=JSON.parse(await fs.readFile('.local/test-state.json','utf8'));const fixture=JSON.parse(await fs.readFile('.local/export-expected.json','utf8'));
+const client=createClient(process.env.VITE_SUPABASE_URL,process.env.VITE_SUPABASE_ANON_KEY,{auth:{persistSession:false}});await client.auth.signInWithPassword(state.accounts.find(x=>x.role==='admin'));
+const {data:ticket,error}=await client.from('tickets').select('*').eq('id',fixture.id).single();if(error)throw error;
+const catalogs={};for(const name of ['categories','systems','departments','staff','app_users'])catalogs[name]=(await client.from(name).select('*')).data;
+const attachments=(await client.from('ticket_attachments').select('*').eq('ticket_id',ticket.id)).data||[];
+for(const attachment of attachments)attachment.url=(await client.storage.from('ticket-images').createSignedUrl(attachment.path,300)).data?.signedUrl;
+const {exportTicketPdf}=await import(pathToFileURL(path.resolve('.local/pdf-check/export-pdf.cjs')).href);
+const blob=await exportTicketPdf(ticket,catalogs,attachments);await fs.writeFile('.local/pdf-check/verified-long.pdf',Buffer.from(await blob.arrayBuffer()));
+console.log(`PDF từ mã export của ứng dụng: ${blob.size} bytes, ${attachments.length} ảnh.`);

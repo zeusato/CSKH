@@ -1,0 +1,297 @@
+{
+  "at": "2026-09-12T10:24:19.411Z",
+  "rows": 50000,
+  "concurrency": 20,
+  "role": "authenticated (User)",
+  "marker": "BENCH_1789208659411",
+  "queries": [
+    {
+      "label": "FTS nhiều từ không dấu",
+      "samples": 60,
+      "p50": 1492,
+      "p95": 7536,
+      "max": 7680,
+      "errors": 0
+    },
+    {
+      "label": "Tìm nội dung nghiệp vụ",
+      "samples": 60,
+      "p50": 1437,
+      "p95": 2737,
+      "max": 2946,
+      "errors": 0
+    },
+    {
+      "label": "Lọc thư viện",
+      "samples": 60,
+      "p50": 1100,
+      "p95": 5139,
+      "max": 5177,
+      "errors": 0
+    },
+    {
+      "label": "Danh sách mới nhất",
+      "samples": 60,
+      "p50": 191,
+      "p95": 350,
+      "max": 351,
+      "errors": 0
+    },
+    {
+      "label": "Từ khóa ngắn",
+      "samples": 60,
+      "p50": 719,
+      "p95": 1087,
+      "max": 1104,
+      "errors": 0
+    }
+  ],
+  "sql": [
+    {
+      "label": "FTS nhiều từ không dấu",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 302.137,
+                "Actual Total Time": 302.137,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 10986,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.033,
+              "Triggers": [],
+              "Execution Time": 302.154
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Tìm nội dung nghiệp vụ",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 211.298,
+                "Actual Total Time": 211.299,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 10986,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.026,
+              "Triggers": [],
+              "Execution Time": 211.321
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Lọc thư viện",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 112.674,
+                "Actual Total Time": 112.674,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 14187,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.023,
+              "Triggers": [],
+              "Execution Time": 112.686
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Danh sách mới nhất",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 13.924,
+                "Actual Total Time": 13.925,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 1527,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.022,
+              "Triggers": [],
+              "Execution Time": 13.935
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Từ khóa ngắn",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 98.24,
+                "Actual Total Time": 98.24,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 10946,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.049,
+              "Triggers": [],
+              "Execution Time": 98.252
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "environment": "Development project; synthetic Vietnamese tickets; warm API connections after login"
+}

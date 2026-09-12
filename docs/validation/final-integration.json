@@ -1,0 +1,15 @@
+{
+  "at": "2026-09-12T11:32:39.917Z",
+  "checks": [
+    "Search cursor has no duplicates or missing rows",
+    "Vietnamese prefix AND search and exact code",
+    "Cursor crosses title and body ranks without omissions",
+    "Updating title updates full-text index",
+    "Concurrent image reservation enforces maximum 10",
+    "Locked member sees neither search rows nor counts",
+    "Admin Edge creates an ordinary test member",
+    "Admin resets member password",
+    "User metadata cannot grant administration",
+    "Recovery token can change password without sending email"
+  ]
+}

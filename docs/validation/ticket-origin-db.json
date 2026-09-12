@@ -1,0 +1,14 @@
+{
+  "at": "2026-09-12T13:16:37.358Z",
+  "passed": [
+    "Authenticated insert/read customer fields",
+    "Leading zeros preserved",
+    "Update to broker and version increment",
+    "Mixed branches rejected",
+    "Invalid origin rejected",
+    "Overlong value rejected",
+    "Legacy null supported",
+    "Rolled back without retaining fixtures"
+  ],
+  "method": "Authenticated role using existing active Admin membership; no Auth session or account created. Explicit negative ticket number avoids consuming the ticket sequence."
+}

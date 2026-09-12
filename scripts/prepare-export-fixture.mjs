@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+import {createClient} from '@supabase/supabase-js';
+const state=JSON.parse(await fs.readFile('.local/test-state.json','utf8'));
+const client=createClient(process.env.VITE_SUPABASE_URL,process.env.VITE_SUPABASE_ANON_KEY,{auth:{persistSession:false}});const identity=state.accounts.find(x=>x.role==='admin');await client.auth.signInWithPassword(identity);
+const {data:ticket,error}=await client.from('tickets').select('id').like('title','[KIỂM THỬ GIAO DIỆN]%').single();if(error)throw error;
+state.tickets=[...new Set([...state.tickets,ticket.id])];await fs.writeFile('.local/test-state.json',JSON.stringify(state,null,2));
+const description=Array.from({length:180},(_,i)=>`Thông tin ${i+1}: Khách hàng cần hỗ trợ kiểm tra trạng thái giao dịch. CSKH đã trao đổi cùng bộ phận liên quan và cập nhật kết quả. Nội dung kiểm thử dài để bảo đảm xuất Excel không mất dữ liệu tiếng Việt.`).join('\n\n');
+const resolution=Array.from({length:15},(_,i)=>`Bước ${i+1}. Kiểm tra thông tin đã tiếp nhận, xác minh nguyên nhân và hướng dẫn khách hàng thực hiện.\nGhi lại thời điểm xử lý và kết quả để CSKH tham khảo sau này.`).join('\n\n');
+const update=await client.from('tickets').update({description,resolution}).eq('id',ticket.id);if(update.error)throw update.error;
+console.log(`Đã chuẩn bị ticket kiểm thử: mô tả ${description.length} ký tự, kết quả ${resolution.length} ký tự.`);
+await fs.writeFile('.local/export-expected.json',JSON.stringify({id:ticket.id,description,resolution}));

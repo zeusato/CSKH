@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-12T11:33:47.064Z",
+  "migration": "014_bounded_search_pages.sql",
+  "checks": [
+    "Anonymous cannot execute search RPC",
+    "Active ordinary member can search shared tickets",
+    "SQL-like parameters remain data and cannot bypass filters",
+    "Locked member with existing JWT cannot search or read detail",
+    "JWT user metadata does not grant administration",
+    "Missing membership cannot read through definer core",
+    "Source RLS enabled, private search fixed path, anonymous revoked"
+  ]
+}

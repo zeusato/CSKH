@@ -1,0 +1,326 @@
+{
+  "at": "2026-09-12T11:22:19.634Z",
+  "rows": 50000,
+  "concurrency": 20,
+  "role": "authenticated (User)",
+  "marker": "BENCH_1789212139634",
+  "queries": [
+    {
+      "label": "FTS nhiều từ không dấu",
+      "samples": 60,
+      "p50": 1294,
+      "p95": 11554,
+      "max": 11564,
+      "errors": 0
+    },
+    {
+      "label": "Tìm nội dung nghiệp vụ",
+      "samples": 60,
+      "p50": 514,
+      "p95": 2949,
+      "max": 2950,
+      "errors": 0
+    },
+    {
+      "label": "Lọc thư viện",
+      "samples": 60,
+      "p50": 5210,
+      "p95": 10790,
+      "max": 10792,
+      "errors": 0
+    },
+    {
+      "label": "Danh sách mới nhất",
+      "samples": 60,
+      "p50": 323,
+      "p95": 429,
+      "max": 434,
+      "errors": 0
+    },
+    {
+      "label": "Từ khóa ngắn",
+      "samples": 60,
+      "p50": 337,
+      "p95": 502,
+      "max": 506,
+      "errors": 0
+    }
+  ],
+  "sql": [
+    {
+      "label": "FTS nhiều từ không dấu",
+      "samples": 20,
+      "p50": 51,
+      "p95": 70,
+      "max": 395,
+      "measurement": "Warm SQL execution, sequential samples after concurrent API load; excludes network, not SQL under 20-way load",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 63.523,
+                "Actual Total Time": 63.524,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 8086,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.031,
+              "Triggers": [],
+              "Execution Time": 63.543
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Tìm nội dung nghiệp vụ",
+      "samples": 20,
+      "p50": 48,
+      "p95": 173,
+      "max": 504,
+      "measurement": "Warm SQL execution, sequential samples after concurrent API load; excludes network, not SQL under 20-way load",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 503.698,
+                "Actual Total Time": 503.698,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 8053,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.025,
+              "Triggers": [],
+              "Execution Time": 503.713
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Lọc thư viện",
+      "samples": 20,
+      "p50": 100,
+      "p95": 133,
+      "max": 3362,
+      "measurement": "Warm SQL execution, sequential samples after concurrent API load; excludes network, not SQL under 20-way load",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 101.923,
+                "Actual Total Time": 101.923,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 18504,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.025,
+              "Triggers": [],
+              "Execution Time": 101.938
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Danh sách mới nhất",
+      "samples": 20,
+      "p50": 12,
+      "p95": 17,
+      "max": 17,
+      "measurement": "Warm SQL execution, sequential samples after concurrent API load; excludes network, not SQL under 20-way load",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 11.856,
+                "Actual Total Time": 11.857,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 1628,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.023,
+              "Triggers": [],
+              "Execution Time": 11.87
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Từ khóa ngắn",
+      "samples": 20,
+      "p50": 32,
+      "p95": 37,
+      "max": 48,
+      "measurement": "Warm SQL execution, sequential samples after concurrent API load; excludes network, not SQL under 20-way load",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Result",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0,
+                "Total Cost": 0.26,
+                "Plan Rows": 1,
+                "Plan Width": 32,
+                "Actual Startup Time": 31.564,
+                "Actual Total Time": 31.565,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 8029,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.024,
+              "Triggers": [],
+              "Execution Time": 31.605
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "environment": "Development project; synthetic Vietnamese tickets; warm API connections after login; VACUUM ANALYZE after bulk import and after prior fixture deletion",
+  "migration": "013_gated_ranked_pages.sql",
+  "security": "Ordinary User JWT; public invoker wrapper; approved private definer with live membership gate; source RLS remains enabled",
+  "region": "ap-southeast-1",
+  "projectStatus": "ACTIVE_HEALTHY"
+}

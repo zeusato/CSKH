@@ -1,0 +1,12 @@
+{
+  "at": "2026-09-12T11:49:13.672Z",
+  "deleted": {
+    "tickets": 1,
+    "staff": 1,
+    "systems": 1,
+    "categories": 1,
+    "departments": 1,
+    "accounts": 2
+  },
+  "retainedTestAdmins": 1
+}

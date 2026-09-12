@@ -1,0 +1,3 @@
+const ref=new URL(process.env.VITE_SUPABASE_URL).hostname.split('.')[0];
+const query="select state,wait_event_type,wait_event,round(extract(epoch from now()-query_start)) as seconds,left(query,70) as statement from pg_stat_activity where datname=current_database() and pid<>pg_backend_pid() and state<>'idle' and query not like '%vault%' order by query_start;";
+const r=await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`,{method:'POST',headers:{Authorization:`Bearer ${process.env.SUPABASE_ACCESS_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({query})});console.log(await r.text());

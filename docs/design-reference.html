@@ -1,0 +1,159 @@
+<style>
+#cskh-directions{color-scheme:light;--cs-bg:light-dark(#f6f7f9,#17191e);--cs-surface:light-dark(#ffffff,#21242b);--cs-ink:light-dark(#202733,#eef0f4);--cs-muted:light-dark(#526073,#b5bfcd);--cs-line:light-dark(#dbe0e7,#404650);--cs-accent:light-dark(#b84a07,#ffad70);--cs-on-accent:light-dark(#ffffff,#351a08);--cs-tint:light-dark(#fff1e7,#4b3020);--cs-side:light-dark(#fafbfc,#1c1f25);--cs-side-ink:light-dark(#343e4d,#d7dfe9);--cs-radius:8px;--cs-pad:18px;font:16px/1.55 'Segoe UI',Arial,sans-serif;color:var(--cs-ink);width:100%;background:transparent}
+#cskh-directions *{box-sizing:border-box}
+#cskh-directions button,#cskh-directions input,#cskh-directions select{font:inherit}
+#cskh-directions button{cursor:pointer}
+#cskh-directions .cs-concept{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:11px 20px;border-bottom:1px solid var(--cs-line);font-size:13px;color:var(--cs-muted);background:var(--cs-surface)}
+#cskh-directions .cs-shell{display:grid;grid-template-columns:196px minmax(0,1fr);border:1px solid var(--cs-line);border-radius:var(--cs-radius);background:var(--cs-bg);overflow:hidden}
+#cskh-directions .cs-sidebar{background:var(--cs-side);color:var(--cs-side-ink);padding:24px 12px;display:flex;flex-direction:column;border-right:1px solid var(--cs-line)}
+#cskh-directions .cs-brand{padding:0 12px 28px;display:flex;align-items:center;gap:10px;font-size:17px;font-weight:650;letter-spacing:-.4px}
+#cskh-directions .cs-monogram{width:33px;height:33px;display:grid;place-items:center;background:var(--cs-accent);color:var(--cs-on-accent);border-radius:var(--cs-radius);font-size:12px;letter-spacing:0}
+#cskh-directions .cs-nav{display:flex;flex-direction:column;gap:5px}
+#cskh-directions .cs-nav button{display:flex;align-items:center;gap:10px;text-align:left;padding:11px 12px;border:0;border-radius:var(--cs-radius);background:transparent;color:inherit;min-height:46px}
+#cskh-directions .cs-nav button[aria-pressed=true]{background:var(--cs-tint);color:var(--cs-accent);font-weight:600}
+#cskh-directions .cs-nav svg{width:17px;height:17px;flex-shrink:0}
+#cskh-directions .cs-nav-label{padding:24px 12px 8px;font-size:13px}
+#cskh-directions .cs-nav-static{display:flex;align-items:center;gap:10px;padding:11px 12px;opacity:.8}
+#cskh-directions .cs-account{margin-top:auto;padding:40px 12px 0;font-size:13px;display:flex;align-items:center;gap:9px}
+#cskh-directions .cs-avatar{width:30px;height:30px;display:grid;place-items:center;background:var(--cs-tint);color:var(--cs-accent);border-radius:50%;font-size:11px;font-weight:600}
+#cskh-directions .cs-main{min-width:0}
+#cskh-directions .cs-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:12px 24px;border-bottom:1px solid var(--cs-line);background:var(--cs-surface);font-size:13px;color:var(--cs-muted)}
+#cskh-directions .cs-theme-control{display:inline-flex;gap:10px;align-items:center;min-height:44px;cursor:pointer;color:var(--cs-ink);font-size:14px}
+#cskh-directions .cs-theme-control input{appearance:none;flex-shrink:0;width:40px;height:24px;margin:0;border:1px solid var(--cs-muted);border-radius:14px;background:var(--cs-bg);position:relative;cursor:pointer}
+#cskh-directions .cs-theme-control input::before{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--cs-muted)}
+#cskh-directions .cs-theme-control input:checked{background:var(--cs-accent);border-color:var(--cs-accent)}
+#cskh-directions .cs-theme-control input:checked::before{left:19px;background:var(--cs-on-accent)}
+#cskh-directions .cs-main-content{padding:25px 26px}
+#cskh-directions .cs-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+#cskh-directions h2{font-size:24px;line-height:1.3;letter-spacing:-.6px;font-weight:650;margin:0 0 5px}
+#cskh-directions .cs-subtitle{font-size:15px;color:var(--cs-muted)}
+#cskh-directions .cs-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border:1px solid var(--cs-line);border-radius:var(--cs-radius);padding:9px 14px;background:var(--cs-surface);color:var(--cs-ink)}
+#cskh-directions .cs-primary{background:var(--cs-accent);color:var(--cs-on-accent);border-color:var(--cs-accent);font-weight:600}
+#cskh-directions .cs-action svg{width:16px;height:16px}
+#cskh-directions .cs-toolbar{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}
+#cskh-directions .cs-search{display:flex;align-items:center;gap:10px;background:var(--cs-surface);border:1px solid var(--cs-line);border-radius:var(--cs-radius);padding:0 12px;flex:1;min-width:180px}
+#cskh-directions .cs-search svg{width:17px;height:17px;color:var(--cs-muted);flex-shrink:0}
+#cskh-directions input[type=search]{border:0;background:transparent;color:var(--cs-ink);width:100%;min-width:0;padding:11px 0}
+#cskh-directions input::placeholder{color:var(--cs-muted);opacity:1}
+#cskh-directions .cs-system{background:var(--cs-surface);color:var(--cs-ink);border:1px solid var(--cs-line);border-radius:var(--cs-radius);padding:10px 9px;max-width:100%}
+#cskh-directions .cs-status-tabs{display:flex;gap:18px;flex-wrap:wrap;border-bottom:1px solid var(--cs-line);margin-bottom:17px}
+#cskh-directions .cs-status-tabs button{min-height:44px;border:0;border-bottom:2px solid transparent;padding:0 0 11px;background:transparent;color:var(--cs-muted);font-size:14px}
+#cskh-directions .cs-status-tabs button[aria-pressed=true]{border-bottom-color:var(--cs-accent);color:var(--cs-accent);font-weight:600}
+#cskh-directions .cs-table-wrap{overflow-x:auto;background:var(--cs-surface);border:1px solid var(--cs-line);border-radius:var(--cs-radius)}
+#cskh-directions table{width:100%;border-collapse:collapse;text-align:left;min-width:680px}
+#cskh-directions th{font-size:14px;font-weight:600;color:var(--cs-muted);background:var(--cs-side);padding:12px 14px;white-space:nowrap}
+#cskh-directions td{padding:var(--cs-pad) 14px;border-top:1px solid var(--cs-line);vertical-align:middle;font-size:15px}
+#cskh-directions td:first-child{width:45%}
+#cskh-directions .cs-ticket{min-height:44px;padding:0;border:0;background:transparent;text-align:left;color:var(--cs-ink);font-size:16px;font-weight:600;line-height:1.5}
+#cskh-directions .cs-ticket:hover{color:var(--cs-accent);text-decoration:underline}
+#cskh-directions .cs-meta{font-size:14px;color:var(--cs-muted);margin-top:5px}
+#cskh-directions .cs-date{white-space:nowrap;font-variant-numeric:tabular-nums}
+#cskh-directions .cs-date span{display:block;color:var(--cs-muted);font-size:14px;margin-top:3px}
+#cskh-directions .cs-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;font-size:14px;white-space:nowrap;font-weight:500}
+#cskh-directions .cs-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+#cskh-directions .cs-new{background:light-dark(#edf3fd,#26344d);color:light-dark(#285aad,#a9c6f5)}
+#cskh-directions .cs-progress{background:light-dark(#fff4df,#453821);color:light-dark(#875711,#f0cc8d)}
+#cskh-directions .cs-done{background:light-dark(#eaf5ef,#213e30);color:light-dark(#216b4b,#a0d4b7)}
+#cskh-directions .cs-cancel{background:light-dark(#eef0f3,#373b43);color:light-dark(#626975,#c3c8d1)}
+#cskh-directions .cs-footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--cs-muted);margin-top:14px}
+#cskh-directions .cs-detail{background:var(--cs-surface);border:1px solid var(--cs-line);border-radius:var(--cs-radius);padding:20px;margin-top:17px}
+#cskh-directions .cs-detail-head{display:flex;align-items:start;justify-content:space-between;gap:14px}
+#cskh-directions .cs-detail h3{font-size:17px;line-height:1.4;margin:5px 0 15px;font-weight:600}
+#cskh-directions .cs-detail dl{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0}
+#cskh-directions .cs-detail dt{font-size:14px;color:var(--cs-muted);margin-bottom:5px}
+#cskh-directions .cs-detail dd{font-size:16px;margin:0;line-height:1.65}
+#cskh-directions .cs-full{grid-column:1/-1}
+#cskh-directions .cs-field{display:grid;gap:6px;margin-bottom:14px;font-size:15px;color:var(--cs-ink)}
+#cskh-directions .cs-field input,#cskh-directions .cs-field textarea{width:100%;font:inherit;font-size:16px;color:var(--cs-ink);background:var(--cs-bg);border:1px solid var(--cs-line);border-radius:var(--cs-radius);padding:11px}
+#cskh-directions [hidden]{display:none!important}
+@media(max-width:740px){#cskh-directions .cs-shell{grid-template-columns:1fr}#cskh-directions .cs-sidebar{padding:13px 16px;border-right:0;border-bottom:1px solid var(--cs-line);gap:10px}#cskh-directions .cs-brand{padding:0;font-size:16px}#cskh-directions .cs-nav{flex-direction:row;flex-wrap:wrap}#cskh-directions .cs-nav-label,#cskh-directions .cs-nav-static,#cskh-directions .cs-account{display:none}#cskh-directions .cs-main-content{padding:20px 16px}#cskh-directions .cs-top{padding:12px 16px}#cskh-directions h2{font-size:22px}#cskh-directions .cs-detail dl{grid-template-columns:1fr}}
+@media(pointer:coarse){#cskh-directions button,#cskh-directions select{min-height:44px}#cskh-directions input,#cskh-directions textarea{font-size:16px!important}}
+</style>
+<div id="cskh-directions" aria-label="Phong cách giao diện CSKH">
+  <div class="cs-shell">
+    <div class="cs-concept"><span id="cs-concept-name">Tinh gọn</span><span>Màn hình minh họa với dữ liệu giả lập</span></div>
+    <aside class="cs-sidebar">
+      <div class="cs-brand"><span class="cs-monogram">CS</span>Hỗ trợ CSKH</div>
+      <nav class="cs-nav" aria-label="Không gian làm việc">
+        <button type="button" data-view="tickets" aria-pressed="true"><i data-lucide="inbox" aria-hidden="true"></i>Ticket</button>
+        <button type="button" data-view="library" aria-pressed="false"><i data-lucide="book-open" aria-hidden="true"></i>Thư viện</button>
+      </nav>
+      <div class="cs-nav-label">Quản lý</div>
+      <div class="cs-nav-static"><i data-lucide="folder-closed" aria-hidden="true"></i>Danh mục</div>
+      <div class="cs-nav-static"><i data-lucide="users" aria-hidden="true"></i>Tài khoản</div>
+      <div class="cs-account"><span class="cs-avatar">CS</span><span>Nhân viên CSKH<br>Admin</span></div>
+    </aside>
+    <main class="cs-main">
+      <div class="cs-top"><span>Không gian CSKH <span aria-hidden="true"> / </span> <span id="cs-breadcrumb">Ticket</span></span><label class="cs-theme-control"><input type="checkbox" role="switch" id="cs-dark-toggle"><span>Chế độ tối</span></label></div>
+      <div class="cs-main-content">
+        <div class="cs-heading"><div><h2 id="cs-title">Quản lý ticket</h2><div class="cs-subtitle" id="cs-subtitle">Tiếp nhận, cập nhật và theo dõi vấn đề.</div></div><button type="button" class="cs-action cs-primary" id="cs-create"><i data-lucide="plus" aria-hidden="true"></i>Tạo ticket</button></div>
+        <div class="cs-toolbar">
+          <label class="cs-search"><i data-lucide="search" aria-hidden="true"></i><input id="cs-search" type="search" placeholder="Tìm tiêu đề, nội dung, kết quả xử lý…" aria-label="Tìm kiếm ticket minh họa"></label>
+          <select id="cs-system" class="cs-system" aria-label="Lọc theo hệ thống"><option value="">Tất cả hệ thống</option>SH Smart App</option><option>SH Smart Web</option><option>SHA App</option><option>Core</option></select>
+        </div>
+        <div class="cs-status-tabs" aria-label="Lọc trạng thái">
+          <button type="button" data-status="" aria-pressed="true">Tất cả</button>
+          <button type="button" data-status="Tiếp nhận" aria-pressed="false">Tiếp nhận</button>
+          <button type="button" data-status="Đang xử lý" aria-pressed="false">Đang xử lý</button>
+          <button type="button" data-status="Đã xử lý" aria-pressed="false">Đã xử lý</button>
+          <button type="button" data-status="Đã hủy" aria-pressed="false">Đã hủy</button>
+        </div>
+        <div class="cs-table-wrap"><table aria-label="Danh sách ticket minh họa"><thead><tr><th scope="col">Ticket</th><th scope="col">Tiếp nhận</th><th scope="col">Trạng thái</th><th scope="col">Bộ phận xử lý</th></tr></thead><tbody id="cs-rows"></tbody></table></div>
+        <div class="cs-footer"><span id="cs-count" role="status" aria-live="polite"></span><span>Thời gian hiển thị: Việt Nam</span></div>
+        <section id="cs-detail" class="cs-detail" aria-label="Chi tiết ticket" hidden></section>
+        <form id="cs-new-form" class="cs-detail" hidden>
+          <div class="cs-detail-head"><h3>Ticket mới · Minh họa</h3><button class="cs-action" type="button" id="cs-close-form">Đóng</button></div>
+          <label class="cs-field">Tiêu đề<input name="title" required maxlength="180" placeholder="Nhập vấn đề cần ghi nhận"></label>
+          <label class="cs-field">Mô tả<textarea name="description" rows="3" required placeholder="Bối cảnh và nội dung vấn đề"></textarea></label>
+          <button class="cs-action cs-primary" type="submit">Thêm vào dữ liệu minh họa</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+(() => {
+  const root=document.getElementById('cskh-directions');
+  const state={style:'minimal',density:'comfortable'};
+  let theme='light';
+  const styles={
+    minimal:{name:'Tinh gọn',bg:'light-dark(#f6f7f9,#17191e)',surface:'light-dark(#ffffff,#21242b)',side:'light-dark(#fafbfc,#1c1f25)',sideInk:'light-dark(#343e4d,#d7dfe9)',line:'light-dark(#dbe0e7,#404650)',radius:'8px',pad:'18px'},
+    soft:{name:'Mềm & thân thiện',bg:'light-dark(#faf6f2,#201c19)',surface:'light-dark(#ffffff,#2a2521)',side:'light-dark(#fff5ec,#241e19)',sideInk:'light-dark(#493e35,#e8dcd0)',line:'light-dark(#e5ddd5,#51453b)',radius:'13px',pad:'22px'},
+    contrast:{name:'Nhiều thông tin',bg:'light-dark(#f1f3f5,#161b21)',surface:'light-dark(#ffffff,#202831)',side:'light-dark(#edf0f4,#191f27)',sideInk:'light-dark(#303c4b,#dce7f1)',line:'light-dark(#cbd3de,#455262)',radius:'6px',pad:'14px'}
+  };
+  function renderStyle(){const s=styles[state.style];root.style.colorScheme=theme;root.querySelector('#cs-dark-toggle').checked=theme==='dark';Object.entries({bg:s.bg,surface:s.surface,side:s.side,'side-ink':s.sideInk,line:s.line,radius:s.radius,pad:state.density==='compact'?'12px':s.pad}).forEach(([k,v])=>root.style.setProperty('--cs-'+k,v));root.querySelector('#cs-concept-name').textContent=s.name;}
+  const rows=[
+    {id:'CSKH-000126',title:'Không nhận được mã OTP khi đăng nhập',system:'SH Smart App',category:'Đăng nhập',day:'12/09/2026',time:'09:42',status:'Tiếp nhận',department:'Chưa xác định',description:'TVĐT phản ánh khách hàng chưa nhận được mã OTP khi đăng nhập. CSKH đã ghi nhận thông tin để kiểm tra.',result:'Chưa có kết quả xử lý.',completed:'—'},
+    {id:'CSKH-000125',title:'Số dư chưa cập nhật sau khi chuyển tiền',system:'Core',category:'Tiền và số dư',day:'12/09/2026',time:'09:15',status:'Đang xử lý',department:'Nghiệp vụ',description:'TVĐT báo số dư hiển thị chưa cập nhật sau giao dịch chuyển tiền. Đang phối hợp kiểm tra trạng thái ghi nhận.',result:'Đang chờ thông tin từ bộ phận xử lý.',completed:'—'},
+    {id:'CSKH-000124',title:'Màn hình xác nhận lệnh không hiển thị',system:'SH Smart Web',category:'Giao dịch',day:'11/09/2026',time:'14:28',status:'Đã xử lý',department:'CNTT',description:'TVĐT báo cửa sổ xác nhận không xuất hiện trên trình duyệt trong một phiên sử dụng.',result:'Trường hợp minh họa: bộ phận xử lý đã xác định nguyên nhân và cung cấp hướng dẫn. CSKH đã phản hồi TVĐT và ghi nhận kết quả kiểm tra lại.',completed:'11/09/2026 · 15:10'},
+    {id:'CSKH-000123',title:'Hướng dẫn tra cứu lịch sử giao dịch',system:'SHA App',category:'Hướng dẫn sử dụng',day:'11/09/2026',time:'10:05',status:'Đã xử lý',department:'CSKH',description:'TVĐT cần hướng dẫn tra cứu các giao dịch theo khoảng thời gian để hỗ trợ khách hàng.',result:'Trường hợp minh họa: đã gửi hướng dẫn tra cứu tương ứng với phiên bản ứng dụng được sử dụng và giải thích cách chọn khoảng thời gian.',completed:'11/09/2026 · 10:20'},
+    {id:'CSKH-000122',title:'Thông báo đăng nhập được gửi lặp lại',system:'SH Smart App',category:'Thông báo',day:'10/09/2026',time:'15:30',status:'Đã hủy',department:'CSKH',description:'Bản ghi trùng với vấn đề đã được tiếp nhận trước đó.',result:'Hủy do ghi nhận trùng.',completed:'—'}
+  ];
+  let view='tickets',status='';
+  const normalize=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase();
+  const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const badge=s=>'<span class="cs-badge '+({'Tiếp nhận':'cs-new','Đang xử lý':'cs-progress','Đã xử lý':'cs-done','Đã hủy':'cs-cancel'}[s])+'">'+escape(s)+'</span>';
+  function renderRows(){
+    const q=normalize(root.querySelector('#cs-search').value).trim();
+    const system=root.querySelector('#cs-system').value;
+    const selected=rows.filter(r=>(view!=='library'||r.status==='Đã xử lý')&&(!status||r.status===status)&&(!system||r.system===system)&&q.split(/\s+/).every(term=>normalize([r.id,r.title,r.description,r.result].join(' ')).includes(term)));
+    root.querySelector('#cs-rows').innerHTML=selected.length?selected.map(r=>'<tr><td><button type="button" class="cs-ticket" data-ticket="'+escape(r.id)+'">'+escape(r.title)+'</button><div class="cs-meta">'+escape(r.id)+' · '+escape(r.system)+'<br>'+escape(r.category)+'</div></td><td class="cs-date">'+escape(r.day)+'<span>'+escape(r.time)+'</span></td><td>'+badge(r.status)+'</td><td>'+escape(r.department)+'</td></tr>').join(''):'<tr><td colspan="4">Không tìm thấy ticket phù hợp.</td></tr>';
+    root.querySelector('#cs-count').textContent=selected.length+' ticket minh họa';
+  }
+  function showDetail(id){const r=rows.find(t=>t.id===id);if(!r)return;const detail=root.querySelector('#cs-detail');root.querySelector('#cs-new-form').hidden=true;detail.hidden=false;detail.innerHTML='<div class="cs-detail-head"><div><div class="cs-meta">'+escape(r.id)+'</div><h3>'+escape(r.title)+'</h3></div><button type="button" class="cs-action" data-close-detail>Đóng</button></div><dl><div><dt>Trạng thái</dt><dd>'+badge(r.status)+'</dd></div><div><dt>Hoàn thành</dt><dd>'+escape(r.completed)+'</dd></div><div class="cs-full"><dt>Mô tả vấn đề</dt><dd>'+escape(r.description)+'</dd></div><div class="cs-full"><dt>Kết quả xử lý</dt><dd>'+escape(r.result)+'</dd></div></dl>';}
+  root.addEventListener('click',event=>{
+    const nav=event.target.closest('[data-view]');if(nav){view=nav.dataset.view;status='';root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===view)));root.querySelectorAll('[data-status]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.status==='')));root.querySelector('#cs-title').textContent=view==='library'?'Thư viện tham khảo':'Quản lý ticket';root.querySelector('#cs-subtitle').textContent=view==='library'?'Tra cứu bối cảnh và kết quả từ các ticket đã xử lý.':'Tiếp nhận, cập nhật và theo dõi vấn đề.';root.querySelector('#cs-breadcrumb').textContent=view==='library'?'Thư viện':'Ticket';root.querySelector('.cs-status-tabs').hidden=view==='library';root.querySelector('#cs-detail').hidden=true;renderRows();}
+    const tab=event.target.closest('[data-status]');if(tab){status=tab.dataset.status;root.querySelectorAll('[data-status]').forEach(b=>b.setAttribute('aria-pressed',String(b===tab)));renderRows();}
+    const ticket=event.target.closest('[data-ticket]');if(ticket)showDetail(ticket.dataset.ticket);
+    if(event.target.closest('[data-close-detail]'))root.querySelector('#cs-detail').hidden=true;
+  });
+  root.querySelector('#cs-search').addEventListener('input',renderRows);
+  root.querySelector('#cs-system').addEventListener('change',renderRows);
+  root.querySelector('#cs-dark-toggle').addEventListener('change',event=>{theme=event.currentTarget.checked?'dark':'light';renderStyle();});
+  root.querySelector('#cs-create').addEventListener('click',()=>{root.querySelector('#cs-detail').hidden=true;root.querySelector('#cs-new-form').hidden=false;root.querySelector('#cs-new-form input').focus();});
+  root.querySelector('#cs-close-form').addEventListener('click',()=>root.querySelector('#cs-new-form').hidden=true);
+  root.querySelector('#cs-new-form').addEventListener('submit',event=>{event.preventDefault();const form=event.currentTarget;rows.unshift({id:'DEMO-'+(rows.length+1),title:form.elements.title.value,description:form.elements.description.value,system:'Chưa xác định',category:'Chưa phân mục',day:'12/09/2026',time:'10:00',status:'Tiếp nhận',department:'Chưa xác định',result:'Chưa có kết quả xử lý.',completed:'—'});form.reset();form.hidden=true;view='tickets';root.querySelector('[data-view=tickets]').click();root.querySelector('#cs-search').value='';root.querySelector('#cs-system').value='';renderRows();});
+  renderStyle();renderRows();
+  if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:renderStyle});tweak.addSelect(state,'style',{label:'Phong cách',options:[{label:'Tinh gọn',value:'minimal'},{label:'Mềm & thân thiện',value:'soft'},{label:'Nhiều thông tin',value:'contrast'}]});tweak.addSelect(state,'density',{label:'Khoảng cách các dòng',options:[{label:'Thoải mái',value:'comfortable'},{label:'Gọn hơn',value:'compact'}]});}
+})();
+</script>

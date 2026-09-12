@@ -1,0 +1,16 @@
+{
+  "at": "2026-09-12T11:44:24.945Z",
+  "migration": "016_viewer_role.sql",
+  "checks": [
+    "Admin creates viewer; viewer reads search, library, details and catalogs",
+    "Viewer can read private images for preview and export",
+    "Viewer cannot update or delete any workspace record through REST",
+    "Viewer cannot create tickets, catalogs or image metadata",
+    "Viewer cannot upload even with an existing pending image slot",
+    "Viewer cannot change roles or invoke administration/cleanup",
+    "Viewer can change own password",
+    "Downgrade takes effect with existing User JWT; upgrade restores writes",
+    "Locked viewer cannot search or create signed image URLs"
+  ],
+  "passed": true
+}

@@ -1,0 +1,215 @@
+{
+  "at": "2026-09-12T13:00:34.465Z",
+  "method": "EXPLAIN ANALYZE as authenticated with existing Admin membership, every insert rolled back; no Auth session created",
+  "writes": [
+    {
+      "table": "departments",
+      "sample": 0,
+      "executionMs": 34.634,
+      "planningMs": 0.137,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17598",
+          "Constraint Name": "departments_created_by_fkey",
+          "Relation": "departments",
+          "Time": 21.849,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "departments",
+          "Time": 2.652,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 837
+    },
+    {
+      "table": "departments",
+      "sample": 1,
+      "executionMs": 3.03,
+      "planningMs": 0.082,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17598",
+          "Constraint Name": "departments_created_by_fkey",
+          "Relation": "departments",
+          "Time": 1.081,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "departments",
+          "Time": 0.72,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 930
+    },
+    {
+      "table": "departments",
+      "sample": 2,
+      "executionMs": 3.127,
+      "planningMs": 0.089,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17598",
+          "Constraint Name": "departments_created_by_fkey",
+          "Relation": "departments",
+          "Time": 1.162,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "departments",
+          "Time": 0.724,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 416
+    },
+    {
+      "table": "departments",
+      "sample": 3,
+      "executionMs": 3.033,
+      "planningMs": 0.088,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17598",
+          "Constraint Name": "departments_created_by_fkey",
+          "Relation": "departments",
+          "Time": 1.106,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "departments",
+          "Time": 0.713,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 1249
+    },
+    {
+      "table": "systems",
+      "sample": 0,
+      "executionMs": 8.905,
+      "planningMs": 0.115,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17653",
+          "Constraint Name": "systems_created_by_fkey",
+          "Relation": "systems",
+          "Time": 1.157,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "systems",
+          "Time": 2.075,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 1111
+    },
+    {
+      "table": "systems",
+      "sample": 1,
+      "executionMs": 3.575,
+      "planningMs": 0.083,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17653",
+          "Constraint Name": "systems_created_by_fkey",
+          "Relation": "systems",
+          "Time": 1.131,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "systems",
+          "Time": 0.727,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 321
+    },
+    {
+      "table": "systems",
+      "sample": 2,
+      "executionMs": 2.959,
+      "planningMs": 0.08,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17653",
+          "Constraint Name": "systems_created_by_fkey",
+          "Relation": "systems",
+          "Time": 1.09,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "systems",
+          "Time": 0.76,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 236
+    },
+    {
+      "table": "systems",
+      "sample": 3,
+      "executionMs": 2.969,
+      "planningMs": 0.08,
+      "triggers": [
+        {
+          "Trigger Name": "RI_ConstraintTrigger_c_17653",
+          "Constraint Name": "systems_created_by_fkey",
+          "Relation": "systems",
+          "Time": 1.143,
+          "Calls": 1
+        },
+        {
+          "Trigger Name": "catalog_audit",
+          "Relation": "systems",
+          "Time": 0.722,
+          "Calls": 1
+        }
+      ],
+      "managementRoundTripMs": 254
+    }
+  ],
+  "reads": [
+    {
+      "table": "categories",
+      "rows": 5,
+      "executionMs": 1.447,
+      "managementRoundTripMs": 304
+    },
+    {
+      "table": "systems",
+      "rows": 8,
+      "executionMs": 0.792,
+      "managementRoundTripMs": 1186
+    },
+    {
+      "table": "departments",
+      "rows": 3,
+      "executionMs": 0.778,
+      "managementRoundTripMs": 1175
+    },
+    {
+      "table": "staff",
+      "rows": 2,
+      "executionMs": 0.796,
+      "managementRoundTripMs": 1972
+    },
+    {
+      "table": "app_users",
+      "rows": 1,
+      "executionMs": 0.624,
+      "managementRoundTripMs": 585
+    }
+  ],
+  "otherActiveQueries": []
+}
