@@ -13,9 +13,13 @@
     "db:inspect": "node --env-file=.env scripts/inspect-supabase.mjs",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "db:test": "node --env-file=.env scripts/test-database.mjs",
-    "bootstrap": "node --env-file=.env scripts/bootstrap-admin.mjs"
+    "bootstrap": "node --env-file=.env scripts/bootstrap-admin.mjs",
+    "test:care-db": "node scripts/test-care-database.mjs",
+    "test:care-ui": "node scripts/test-care-ui.mjs"
   },
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
     "@jsquash/webp": "1.5.0",
@@ -28,6 +32,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "exceljs": "4.4.0",
+    "jszip": "3.10.2",
     "lucide-react": "1.45.0",
     "pdf-lib": "^1.17.1",
     "react": "19.3.0",
@@ -39,6 +44,7 @@
     "zod": "4.6.2"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "22.20.2",
     "@types/pg": "8.23.1",

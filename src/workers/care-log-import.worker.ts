@@ -1,0 +1,2 @@
+import {readCareWorkbook,createCareTemplate} from '../lib/care-log-workbook';
+self.onmessage=async event=>{try{const data=event.data;if(data.type==='template'){const buffer=await createCareTemplate(data.catalogs);self.postMessage({buffer});}else self.postMessage({parsed:await readCareWorkbook(data.buffer)});}catch(error){self.postMessage({error:error instanceof Error?error.message:'Không đọc được file Excel.'});}};

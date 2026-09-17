@@ -6,7 +6,13 @@ const ref=new URL(url).hostname.split('.')[0];
 let client;
 async function query(sql){
  if(process.env.DATABASE_URL){
-  client??=new pg.Client({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:true}});
+  if(!client){
+   const connectionUrl=new URL(process.env.DATABASE_URL);
+   // Keep certificate/hostname verification enabled even if a copied URL has sslmode=require.
+   for(const key of ['sslmode','sslcert','sslkey','sslrootcert'])connectionUrl.searchParams.delete(key);
+   const ca=process.env.DATABASE_SSL_CA_FILE?await fs.readFile(process.env.DATABASE_SSL_CA_FILE,'utf8'):undefined;
+   client=new pg.Client({connectionString:connectionUrl.toString(),ssl:{rejectUnauthorized:true,...(ca?{ca}:{})},connectionTimeoutMillis:10000});
+  }
   if(!client._connected)await client.connect();
   return (await client.query(sql)).rows;
  }

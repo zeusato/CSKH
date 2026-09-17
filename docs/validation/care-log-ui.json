@@ -1,0 +1,31 @@
+{
+  "browser": "isolated Chromium",
+  "transport": "mock Supabase; no production requests",
+  "checks": [
+    "create form",
+    "system catalog",
+    "whole row opens detail",
+    "keyboard opens detail",
+    "direct row edit without opening detail",
+    "cancel row deletion",
+    "confirmed row deletion with version",
+    "viewer row read without mutation actions",
+    "real template download",
+    "dd/mm/yyyy template and preview",
+    "specific row errors without horizontal scrolling",
+    "invalid import blocked",
+    "error report download",
+    "import preview minimum height",
+    "390px import errors without overflow",
+    "real XLSX worker parsing",
+    "preview before commit",
+    "explicit confirm",
+    "automatic refresh and close after import",
+    "old filters cleared to show imported batch",
+    "Excel export",
+    "390px no overflow",
+    "viewer read-only",
+    "no-access route"
+  ],
+  "passed": true
+}

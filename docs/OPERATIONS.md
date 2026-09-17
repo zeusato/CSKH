@@ -2,6 +2,8 @@
 
 ## Phạm vi
 
+Phân hệ Nhật ký CSKH có bảng và quyền riêng, dùng chung danh mục hệ thống/phòng ban/nhân sự. Xem [hướng dẫn cấp quyền, sử dụng và import](CARE-LOGS.md), cùng [trạng thái nâng cấp thực tế](validation/care-logs.md). Nhật ký đã xử lý không tự xuất hiện trong thư viện ticket.
+
 CSKH tự ghi nhận và cập nhật trạng thái dựa trên trao đổi thực tế qua Zalo/các kênh nội bộ. Ứng dụng không tự lấy tin nhắn Zalo, không gửi thông báo cho bên xử lý, không xác nhận kết quả từ hệ thống ngoài, không tính SLA.
 
 ## Tài khoản và mật khẩu

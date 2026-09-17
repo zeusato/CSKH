@@ -47,6 +47,8 @@ Role **Chỉ xem** (`viewer`) dành cho người được cấp quyền tra cứ
 
 ## Các chức năng
 
+- **Nhật ký CSKH**: phân hệ riêng với ticket/thư viện; dùng chung danh mục hệ thống, phòng ban và nhân sự. Có quyền Không truy cập / Chỉ xem / Chỉnh sửa, tìm kiếm không dấu, bộ lọc, xuất Excel/PDF, tải mẫu và import Excel có xem trước. Cần áp dụng migration 019 và triển khai bản `admin-users` mới trước khi sử dụng. Xem [hướng dẫn Nhật ký CSKH](docs/CARE-LOGS.md) và [kết quả kiểm thử nâng cấp](docs/validation/care-logs.md).
+
 - Tạo/sửa/xóa ticket; số ticket, người tạo, thời gian tạo và hoàn thành tự ghi bởi database.
 - Trạng thái Tiếp nhận / Đang xử lý / Đã xử lý / Đã hủy. Mở lại ticket sẽ xóa thời điểm hoàn thành.
 - Thư viện hiển thị trực tiếp ticket đã xử lý; tra cứu tiêu đề, mô tả và kết quả không phân biệt dấu tiếng Việt.
@@ -60,6 +62,7 @@ Role **Chỉ xem** (`viewer`) dành cho người được cấp quyền tra cứ
 
 ```powershell
 npm test
+npm run test:care-db
 npm run build
 npm run db:test
 node --env-file=.env scripts/benchmark.mjs

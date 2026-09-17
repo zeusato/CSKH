@@ -19,8 +19,9 @@ Deno.serve(async(req:Request)=>{
   }
   if(body.action==='create'){
    if(typeof body.name!=='string'||!body.name.trim()||body.name.length>160||typeof body.email!=='string'||!/^\S+@\S+\.\S+$/.test(body.email)||typeof body.password!=='string'||body.password.length<8||!['admin','user','viewer'].includes(body.role))return reply({error:'Thông tin tài khoản chưa hợp lệ. Mật khẩu cần ít nhất 8 ký tự.'},400);
+   if(!['none','read','write'].includes(body.care_log_access||'none')||(body.role==='viewer'&&body.care_log_access==='write'))return reply({error:'Quyền Nhật ký CSKH không hợp lệ.'},400);
    const created=await service.auth.admin.createUser({email:body.email,password:body.password,email_confirm:true});if(created.error)throw created.error;
-   const profile=await service.from('app_users').insert({id:created.data.user.id,name:body.name.trim(),role:body.role,department_id:body.department_id||null});
+   const profile=await service.from('app_users').insert({id:created.data.user.id,name:body.name.trim(),role:body.role,department_id:body.department_id||null,care_log_access:body.role==='admin'?'none':(body.care_log_access||'none')});
    if(profile.error){await service.auth.admin.deleteUser(created.data.user.id);throw profile.error;}
    return reply({id:created.data.user.id});
   }
@@ -28,6 +29,9 @@ Deno.serve(async(req:Request)=>{
   const target=await service.from('app_users').select('id').eq('id',body.id).maybeSingle();if(!target.data)return reply({error:'Không tìm thấy tài khoản CSKH.'},404);
   if(body.action==='update'){
    const update:Record<string,unknown>={};
+   if('care_log_access'in body){if(!['none','read','write'].includes(body.care_log_access))return reply({error:'Quyền Nhật ký CSKH không hợp lệ.'},400);update.care_log_access=body.care_log_access;}
+   if(body.role==='viewer'&&body.care_log_access==='write')return reply({error:'Tài khoản Chỉ xem không được quyền ghi nhật ký.'},400);
+   if(body.role==='admin')update.care_log_access='none';
    if('name'in body){if(typeof body.name!=='string'||!body.name.trim()||body.name.length>160)return reply({error:'Tên không hợp lệ.'},400);update.name=body.name.trim();}
    if('role'in body){if(!['admin','user','viewer'].includes(body.role))return reply({error:'Vai trò không hợp lệ.'},400);update.role=body.role;}
    if('department_id'in body)update.department_id=body.department_id||null;
