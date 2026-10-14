@@ -2,6 +2,7 @@
   "browser": "isolated Chromium",
   "transport": "mock Supabase; no production requests",
   "checks": [
+    "account/user create, edit, detail and Excel round-trip",
     "create form",
     "system catalog",
     "whole row opens detail",
@@ -11,7 +12,7 @@
     "confirmed row deletion with version",
     "viewer row read without mutation actions",
     "real template download",
-    "dd/mm/yyyy template and preview",
+    "text date template and dd/mm/yyyy preview",
     "specific row errors without horizontal scrolling",
     "invalid import blocked",
     "error report download",

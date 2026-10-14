@@ -9,7 +9,7 @@ export function careAccess(profile: Profile | null): CareAccess {
 }
 export const requestTypes = {support:'Hỗ trợ',complaint:'Khiếu nại',feedback:'Ý kiến đóng góp'};
 export type CareLogInput = {
- request_type: keyof typeof requestTypes; description: string; response_content: string; notes: string;
+ request_type: keyof typeof requestTypes; description: string; response_content: string; notes: string; account_user: string;
  system_id: string | null; category_id: string | null; receiving_department_id: string;
  receiving_staff_id: string | null; coordinating_department_id: string | null; coordinating_staff_id: string | null;
  status: Status; received_at: string; completed_at: string | null;

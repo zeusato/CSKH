@@ -50,13 +50,13 @@ export async function readCareWorkbook(buffer:ArrayBuffer):Promise<ParsedCareFil
   const label=normalizeName(cellText(cell));if(!label)return;const match=careColumns.find(([,name])=>normalizeName(name)===label);
   if(!match)throw new Error(`Cột không được hỗ trợ: ${cell.text}`);if(found.has(match[0]))throw new Error(`Cột bị lặp: ${match[1]}`);found.add(match[0]);mapping.set(col,match[0]);
  });
- const missing=careColumns.filter(([key])=>!found.has(key));if(missing.length)throw new Error(`Thiếu cột: ${missing.map(x=>x[1]).join(', ')}`);
+ const missing=careColumns.filter(([key])=>key!=='account_user'&&!found.has(key));if(missing.length)throw new Error(`Thiếu cột: ${missing.map(x=>x[1]).join(', ')}`);
  for(let index=2;index<=sheet.rowCount;index++){
   const source=sheet.getRow(index),values:Record<string,string>={};let hasValue=false;
   source.eachCell({includeEmpty:false},(cell,col)=>{if(cell.value!==null){hasValue=true;if(!mapping.has(col))result.errors.push({row:index,field:`Cột ${col}`,message:'Có dữ liệu ngoài các cột của mẫu.'});}});
   if(!hasValue){result.blankRows++;continue;}if(source.hidden)result.hiddenRows++;
   if(result.raw.length>=1000)throw new Error('Tối đa 1.000 dòng dữ liệu mỗi file.');
-  for(const [col,key] of mapping){const cell=source.getCell(col);try{if(cell.isMerged)throw new Error('Không hỗ trợ ô gộp.');values[key]=cellText(cell).trim();}catch(e){result.errors.push({row:index,field:key,message:(e as Error).message});values[key]='';}}
+  for(const [col,key] of mapping){const cell=source.getCell(col);try{if(cell.isMerged)throw new Error('Không hỗ trợ ô gộp.');if(key==='account_user'&&cell.value!==null&&typeof cell.value!=='string'&&(typeof cell.value!=='object'||cell.value instanceof Date))throw new Error('Số tài khoản/user cần nhập dạng Text để giữ nguyên số 0 đầu và ký tự.');values[key]=cellText(cell).trim();}catch(e){result.errors.push({row:index,field:key,message:(e as Error).message});values[key]='';}}
   result.raw.push({row:index,values});
  }
  if(!result.raw.length)throw new Error('File chưa có dòng dữ liệu.');return result;
@@ -64,15 +64,19 @@ export async function readCareWorkbook(buffer:ArrayBuffer):Promise<ParsedCareFil
 export async function createCareTemplate(catalogs:Catalogs){
  const book=new ExcelJS.Workbook();const sheet=book.addWorksheet('Du lieu',{views:[{state:'frozen',ySplit:1}]});
  sheet.columns=careColumns.map(([,header])=>({header,width:header.includes('Mô tả')||header.includes('phản hồi')?45:27}));
- for(const column of [11,12])sheet.getColumn(column).numFmt='dd/mm/yyyy';
- sheet.getRow(1).height=48;sheet.getRow(1).eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFB84A07'}};c.alignment={wrapText:true,vertical:'middle'};});sheet.autoFilter='A1:M1';
+ // Keep typed dates literal: Excel's input locale can interpret 12/8 as December 8
+ // even when a date cell's display format is dd/mm/yyyy.
+ for(const column of [11,12,14])sheet.getColumn(column).numFmt='@';
+ sheet.getRow(1).height=48;sheet.getRow(1).eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFB84A07'}};c.alignment={wrapText:true,vertical:'middle'};});sheet.autoFilter='A1:N1';
  const guide=book.addWorksheet('Huong dan');guide.columns=[{width:32},{width:115}];
  guide.addRows([
   ['Nhật ký CSKH','Mẫu v1. Chỉ sheet Du lieu được nhập. Không đổi tên cột; có thể đổi thứ tự cột.'],
   ['Bắt buộc','Phân loại yêu cầu; Mô tả vấn đề; Bộ phận tiếp nhận; Trạng thái xử lý; Thời gian tiếp nhận.'],
   ['Hoàn thành','Đã xử lý phải có thời gian hoàn thành >= tiếp nhận. Trạng thái khác để trống.'],
   ['Ngày tháng','dd/mm/yyyy. Ví dụ: 17/09/2026. Ngày được lưu lúc 00:00 theo giờ Việt Nam; file cũ có giờ vẫn được giữ nguyên giờ khi nhập.'],
+  ['Tránh đảo ngày/tháng','Hai cột ngày được đặt dạng Text. Nhập đủ năm, ví dụ 12/8/2026 là ngày 12 tháng 8. Giữ định dạng Text; khi sao chép hãy dán giá trị. Với ô ngày Excel có sẵn, kiểm tra đúng ngày/tháng trên bản xem trước trước khi xác nhận.'],
   ['Kênh phát sinh lỗi','Dùng danh sách Hệ thống liên quan hiện có.'],
+  ['Số tài khoản/user','Không bắt buộc, tối đa 255 ký tự. Cột N dạng Text: nhập số tài khoản hoặc user phát sinh vấn đề, giữ nguyên số 0 đầu. Mẫu cũ chưa có cột này vẫn nhập được và để trống tài khoản.'],
   ['Nhân sự','Dùng tên danh bạ thuộc bộ phận tương ứng. Tên trùng phải xử lý trước khi nhập.'],
   ['Phạm vi','Chỉ tạo mới. Dòng ẩn/filter vẫn được nhập; không hỗ trợ công thức, ô gộp hoặc ảnh nhúng.'],
   ['Giới hạn','1.000 dòng; file 10 MB; giải nén 50 MB; dữ liệu sau chuẩn hóa 5 MB; mỗi ô 32.767 ký tự.'],

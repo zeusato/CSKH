@@ -24,6 +24,7 @@ try{
  grant select on public.departments,public.categories,public.systems,public.staff to authenticated;
  `);
  await db.exec(await fs.readFile('supabase/migrations/019_care_logs.sql','utf8'));
+ await db.exec(await fs.readFile('supabase/migrations/020_care_log_account_user.sql','utf8'));
  await check('migration compiles on PostgreSQL',async()=>assert.equal((await one("select to_regclass('public.care_logs') is not null ok")).ok,true));
  for(const role of ['admin','writer','reader','none','viewer']){await db.query('insert into auth.users values($1)',[ids[role]]);await db.query('insert into public.app_users(id,name,role,care_log_access) values($1,$2,$3,$4)',[ids[role],role,role==='admin'?'admin':role==='viewer'?'viewer':'user',role==='writer'?'write':['reader','viewer'].includes(role)?'read':'none']);}
  await db.query('insert into public.departments values($1,$2)',[ids.dept,'CSKH']);await db.query('insert into public.staff values($1,$2,$3)',[ids.staff,'Nguyễn An',ids.dept]);await db.query('insert into public.systems values($1,$2)',[ids.system,'SH Smart APP']);
@@ -33,7 +34,7 @@ try{
  await asUser(ids.writer);
  let batch,log;
  await check('preview validates without writing rows',async()=>{const result=await validate([row]);assert.deepEqual(result.errors,[]);assert.equal((await one('select count(*)::int n from public.care_logs')).n,0);assert.equal(typeof result.token,'string');});
- await check('import commits with historical timestamps and audit identity',async()=>{const v=await validate([row]);batch=await commit([row],'00000000-0000-0000-0000-000000000100',v.token);assert.equal(batch.count,1);log=await one('select * from public.care_logs');assert.equal(log.created_by,ids.writer);assert.equal(new Date(log.completed_at).toISOString(),'2020-09-17T03:00:00.000Z');assert.equal(log.entry_source,'excel_import');assert.equal(log.import_row_number,2);});
+ await check('import commits with historical timestamps and audit identity',async()=>{const v=await validate([row]);batch=await commit([row],'00000000-0000-0000-0000-000000000100',v.token);assert.equal(batch.count,1);log=await one('select * from public.care_logs');assert.equal(log.created_by,ids.writer);assert.equal(new Date(log.completed_at).toISOString(),'2020-09-17T03:00:00.000Z');assert.equal(log.entry_source,'excel_import');assert.equal(log.account_user,'');assert.equal(log.import_row_number,2);});
  await check('retry returns original result even after duplicates change',async()=>{const r=await commit([row],'00000000-0000-0000-0000-000000000100','old-token');assert.equal(r.id,batch.id);assert.equal(r.replayed,true);assert.equal((await one('select count(*)::int n from public.care_logs')).n,1);});
  await check('request ID rejects a different payload',async()=>{await assert.rejects(()=>commit([{...row,notes:'Changed'}],'00000000-0000-0000-0000-000000000100','token'),/dữ liệu khác/);});
  await check('failure during the second insert rolls back rows and batch',async()=>{
@@ -57,6 +58,29 @@ try{
   await assert.rejects(()=>db.query("update public.care_logs set coordinating_staff_id=$1 where id=$2",[ids.staff,created.id]),/Nhân sự phối hợp/);
   await db.exec('reset role');await assert.rejects(()=>db.query('delete from public.systems where id=$1',[ids.system]),/foreign key/);await asUser(ids.writer);
   const removed=await db.query('delete from public.care_logs where id=$1 and version=$2 returning id',[created.id,created.version]);assert.equal(removed.rows.length,1);
+ });
+ await check('account/user text round-trips through manual CRUD, import, search and duplicate checks',async()=>{
+  await db.exec('begin');
+  try{
+   const manual=await one("insert into public.care_logs(request_type,description,account_user,receiving_department_id,received_at) values('support','Account fixture',$1,$2,now()) returning id,account_user",['  001234567890123456  ',ids.dept]);
+   assert.equal(manual.account_user,'001234567890123456');
+   const found=(await one('select public.search_care_logs($1) r',[JSON.stringify({q:'001234567890123456'})])).r;
+   assert.equal(found.items[0].id,manual.id);assert.equal(found.items[0].account_user,manual.account_user);
+   const updated=await one('update public.care_logs set account_user=$1 where id=$2 returning account_user',['user.name@shs',manual.id]);assert.equal(updated.account_user,'user.name@shs');
+   await db.query('update public.care_logs set account_user=$1 where id=$2',['',manual.id]);
+   const imported=[{...row,description:'Unique account issue',account_user:'001234567890123456'},{...row,row:3,description:'Unique account issue',account_user:'069C387999'}];
+   const v=await validate(imported);assert.deepEqual(v.errors,[]);assert.deepEqual(v.warnings,[]);
+   const result=await commit(imported,'00000000-0000-0000-0000-000000000301',v.token);assert.equal(result.count,2);
+   const saved=(await db.query('select account_user from public.care_logs where import_batch_id=$1 order by import_row_number',[result.id])).rows;
+   assert.deepEqual(saved.map(x=>x.account_user),imported.map(x=>x.account_user));
+   assert.ok((await validate([imported[0]])).warnings.some(x=>x.message.includes('Tương tự')));
+   assert.deepEqual((await validate([{...imported[0],account_user:'different-user'}])).warnings,[]);
+   assert.equal((await validate([{...row,account_user:'x'.repeat(256)}])).errors.length,1);
+   assert.equal((await validate([{...row,account_user:123456}])).errors.length,1);
+   const changedPayload=[{...imported[0],account_user:'another-user'}];
+   const originalValidation=await validate([imported[0]]);
+   assert.ok((await commit(changedPayload,'00000000-0000-0000-0000-000000000302',originalValidation.token)).review);
+  }finally{await db.exec('rollback');}
  });
  await check('maximum 1000-row import validates and commits atomically',async()=>{
   const rows=Array.from({length:1000},(_,i)=>({...row,row:i+2,description:`Mẫu tải giới hạn ${i}`,received_at:new Date(Date.UTC(2020,0,1,0,i)).toISOString(),status:'received',completed_at:null}));

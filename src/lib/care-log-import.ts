@@ -1,19 +1,21 @@
 import type {CatalogItem,Catalogs} from './types';
 import {statuses} from './types';
 import {requestTypes,type ImportRow,type ImportIssue} from './care-log-types';
+import {formatDate} from './utils';
 export const careColumns = [
  ['request_type','Phân loại yêu cầu'],['description','Mô tả vấn đề'],['system_id','Kênh phát sinh lỗi'],['category_id','Phân mục'],
  ['receiving_department_id','Bộ phận tiếp nhận'],['receiving_staff_id','Nhân sự tiếp nhận'],['coordinating_department_id','Bộ phận phối hợp xử lý'],['coordinating_staff_id','Nhân sự phối hợp xử lý'],
- ['response_content','Nội dung phản hồi từ bộ phận CSKH'],['status','Trạng thái xử lý'],['received_at','Thời gian tiếp nhận'],['completed_at','Thời gian hoàn thành'],['notes','Ghi chú'],
+ ['response_content','Nội dung phản hồi từ bộ phận CSKH'],['status','Trạng thái xử lý'],['received_at','Thời gian tiếp nhận'],['completed_at','Thời gian hoàn thành'],['notes','Ghi chú'],['account_user','Số tài khoản/user'],
 ] as const;
 export const normalizeName=(value:string)=>value.normalize('NFC').trim().replace(/\s+/g,' ').toLocaleLowerCase('vi');
 export type RawCareRow={row:number;values:Record<string,string>};
 export type ParsedCareFile={raw:RawCareRow[];errors:ImportIssue[];warnings:ImportIssue[];blankRows:number;hiddenRows:number;otherSheets:string[]};
 export function parseCareDate(value:string):{value:string|null;dateOnly:boolean} {
  if(!value.trim())return {value:null,dateOnly:false};
- const match=/^(\d{2})\/(\d{2})\/(\d{4})(?: (\d{2}):(\d{2}))?$/.exec(value.trim());
+ const match=/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?: (\d{2}):(\d{2}))?$/.exec(value.trim());
  if(!match)throw new Error('Nhập ngày theo dd/mm/yyyy, ví dụ 17/09/2026, hoặc dùng ô ngày Excel.');
- const [,day,month,year,hour='00',minute='00']=match;
+ const [,rawDay,rawMonth,year,hour='00',minute='00']=match;
+ const day=rawDay.padStart(2,'0'),month=rawMonth.padStart(2,'0');
  const iso=`${year}-${month}-${day}T${hour}:${minute}:00+07:00`;const date=new Date(iso);
  if(Number(year)<1900||Number(hour)>23||Number(minute)>59||!Number.isFinite(date.getTime()))throw new Error('Ngày giờ không hợp lệ.');
  const local=new Date(date.getTime()+7*3600000).toISOString().slice(0,16);
@@ -21,7 +23,7 @@ export function parseCareDate(value:string):{value:string|null;dateOnly:boolean}
  return {value:date.toISOString(),dateOnly:!match[4]};
 }
 export function careImportDateLabel(value:string){
- try{return parseCareDate(value).value?value.trim().slice(0,10):'';}catch{return value;}
+ try{const date=parseCareDate(value).value;return date?formatDate(date,false):'';}catch{return value;}
 }
 export function normalizeCareRows(parsed:ParsedCareFile,catalogs:Catalogs){
  const errors=[...parsed.errors],warnings=[...parsed.warnings],rows:ImportRow[]=[];
@@ -45,6 +47,8 @@ export function normalizeCareRows(parsed:ParsedCareFile,catalogs:Catalogs){
    }return matches[0].id;
   };
   for(const key of ['description','response_content','notes']){const value=(raw.values[key]||'').trim();data[key]=value;if(value.length>32767)fail(key,'Mỗi ô tối đa 32.767 ký tự.');}
+  data.account_user=(raw.values.account_user||'').trim();
+  if(String(data.account_user).length>255)fail('account_user','Số tài khoản/user tối đa 255 ký tự.');
   if(!data.description)fail('description','Mô tả vấn đề bắt buộc.');
   for(const [key,options] of [['request_type',requestTypes],['status',statuses]] as const){const found=Object.entries(options).find(([,label])=>normalizeName(label)===normalizeName(raw.values[key]||''));if(!found)fail(key,'Giá trị không hợp lệ hoặc chưa được nhập.');else data[key]=found[0];}
   data.system_id=catalog('system_id',catalogs.systems);data.category_id=catalog('category_id',catalogs.categories);

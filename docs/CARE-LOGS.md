@@ -24,12 +24,14 @@ Mở **Nhật ký CSKH → Tạo nhật ký**. Trường bắt buộc:
 - Mô tả vấn đề.
 - Bộ phận tiếp nhận.
 - Trạng thái xử lý.
-- Thời gian tiếp nhận.
-- Thời gian hoàn thành, nếu trạng thái là Đã xử lý.
+- Ngày tiếp nhận.
+- Ngày hoàn thành, nếu trạng thái là Đã xử lý.
+
+**Số tài khoản/user** là trường không bắt buộc, tối đa 255 ký tự, lưu dạng văn bản để giữ nguyên số 0 đầu và tên đăng nhập. Có thể tìm nhật ký bằng tài khoản/user. Mẫu Excel đặt cột N ở dạng Text; ô số bị từ chối vì có thể đã mất số 0 đầu hoặc độ chính xác.
 
 **Kênh phát sinh lỗi** dùng danh sách Hệ thống liên quan. Bộ phận/nhân sự phối hợp là thông tin tùy chọn từ danh mục chung; không tạo ticket hoặc thông báo tới bộ phận khác.
 
-Nhân sự tiếp nhận độc lập với người tạo bản ghi, để hỗ trợ nhập hộ và nhập dữ liệu lịch sử. Có thể nhập thời gian trong quá khứ. Thời gian hoàn thành không được trước tiếp nhận; khi mở lại bản ghi, hệ thống xóa thời gian hoàn thành cũ. Ngày giờ hiển thị theo Việt Nam.
+Nhân sự tiếp nhận độc lập với người tạo bản ghi, để hỗ trợ nhập hộ và nhập dữ liệu lịch sử. Form chỉ nhập ngày, không nhập giờ; ngày hoàn thành không được trước ngày tiếp nhận. Ngày mới hoặc ngày thay đổi được lưu lúc 00:00 theo giờ Việt Nam. Khi chỉ sửa nội dung khác, giờ của dữ liệu cũ vẫn được giữ. Khi mở lại bản ghi, hệ thống xóa ngày hoàn thành cũ. Danh sách, chi tiết và báo cáo hiển thị ngày tiếp nhận/hoàn thành theo `dd/mm/yyyy`; thông tin tạo/cập nhật vẫn có giờ.
 
 Nếu có người khác sửa trước khi lưu/xóa, hệ thống báo xung đột phiên bản. Nội dung form đang nhập vẫn được giữ để đối chiếu. Không tự ghi đè bản mới.
 
@@ -46,8 +48,8 @@ Bấm vào bất kỳ ô thông tin nào trên dòng nhật ký để mở chi t
 ## 4. Nhập Excel
 
 1. Mở **Nhập Excel → Tải mẫu Excel**. Mẫu có sheet Du lieu, Huong dan, Danh muc và metadata phiên bản. Mẫu không có dòng ví dụ để tránh nhập nhầm.
-2. Điền dữ liệu từ dòng 2 của sheet **Du lieu**. Giữ nguyên tên 13 cột; có thể đổi thứ tự cột.
-3. Nhập ngày theo `dd/mm/yyyy` hoặc ô ngày Excel, ví dụ `17/09/2026`. Hai cột ngày của mẫu dùng định dạng này và được lưu lúc 00:00 theo giờ Việt Nam. File cũ có thêm giờ vẫn được chấp nhận và giữ nguyên giờ.
+2. Điền dữ liệu từ dòng 2 của sheet **Du lieu**. Mẫu mới có 14 cột; giữ nguyên tên cột, có thể đổi thứ tự cột. Mẫu cũ 13 cột vẫn được nhận và để trống Số tài khoản/user.
+3. Hai cột ngày K/L của mẫu mới được đặt dạng **Text** để Excel không tự diễn giải theo thiết lập tháng/ngày của máy. Giữ dạng Text và nhập đủ năm, ví dụ `12/8/2026` hoặc `12/08/2026` đều là ngày 12 tháng 8. Ngày được lưu lúc 00:00 theo giờ Việt Nam. File cũ có ô ngày Excel hoặc thêm giờ vẫn được chấp nhận và giữ nguyên giá trị. Với ô ngày Excel có sẵn, đổi định dạng hiển thị không sửa được ngày đã bị hiểu nhầm trước đó; cần kiểm tra bản xem trước.
 4. Chọn file `.xlsx`. Hệ thống đọc và hiển thị bảng xem trước, lỗi/cảnh báo theo đúng dòng Excel. Chưa ghi dữ liệu nghiệp vụ vào database.
 5. Xem khung **Chi tiết lỗi và cảnh báo** phía trên bảng: mỗi lỗi ghi rõ dòng Excel, cột, giá trị trong file và hướng sửa. Lỗi nhân sự ghi rõ bộ phận theo danh mục để đối chiếu. Có thể lọc các dòng lỗi/cảnh báo, chuyển trang, mở nội dung đầy đủ và tải báo cáo lỗi. Ngày trong bảng xem trước hiển thị `dd/mm/yyyy`; mở ô để xem giá trị gốc nếu file có giờ.
 6. Nếu có lỗi, sửa file rồi tải lại. Hệ thống không tự tạo danh mục mới hoặc tự bỏ dòng lỗi.
@@ -89,6 +91,8 @@ node --env-file=.env scripts/deploy-functions.mjs --function=admin-users
 Sau đó phát hành frontend bằng quy trình Vercel hiện có. Migration và Edge Function phải đi trước frontend mới. Không chỉ deploy frontend rồi coi tính năng đã sẵn sàng.
 
 Migration `019_care_logs.sql` thêm cột quyền tài khoản, bảng nhật ký, bảng đợt nhập riêng tư, guard/RLS, trigger, chỉ mục và RPC. Không thay đổi dữ liệu ticket. Không tự cấp quyền nhật ký cho User/Viewer hiện có. Không chạy lại bootstrap Admin.
+
+Migration `020_care_log_account_user.sql` thêm trường `account_user`, quyền ghi cột, tìm kiếm và hỗ trợ import tài khoản/user. Phải áp dụng migration này trước khi phát hành frontend có trường Số tài khoản/user. Dữ liệu cũ mặc định để trống trường này; không sửa ngày hoặc nội dung bản ghi cũ. Lần nâng cấp này không cần thay đổi Edge Function.
 
 Áp dụng SQL cần một trong hai: `DATABASE_URL` hợp lệ hoặc `SUPABASE_ACCESS_TOKEN`. Deploy Edge Function cần `SUPABASE_ACCESS_TOKEN`; service-role key không thay thế Management token.
 
