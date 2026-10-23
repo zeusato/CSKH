@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-23T03:39:17.517Z",
+  "project": "houwqcjbfhfjnzutihxu",
+  "counts": {
+    "call_logs": 0,
+    "call_followups": 0,
+    "tickets": 20,
+    "care_logs": 1894,
+    "library_entries": 19
+  },
+  "profiles": 7,
+  "existingPermissionsPreserved": true,
+  "newAccessDefaultsToNone": true,
+  "purposes": 6,
+  "anonymousTablesDenied": [
+    "call_logs",
+    "call_followups",
+    "call_purposes"
+  ],
+  "anonymousSearchDenied": true,
+  "adminFunctionRequiresAuthentication": true,
+  "verificationWrites": 0
+}

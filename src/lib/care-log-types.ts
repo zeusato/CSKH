@@ -7,7 +7,7 @@ export function careAccess(profile: Profile | null): CareAccess {
  if (profile.role === 'viewer') return profile.care_log_access === 'read' ? 'read' : 'none';
  return profile.care_log_access || 'none';
 }
-export const requestTypes = {support:'Hỗ trợ',complaint:'Khiếu nại',feedback:'Ý kiến đóng góp'};
+export const requestTypes = {support:'Hỗ trợ',error:'Lỗi',complaint:'Khiếu nại',feedback:'Ý kiến đóng góp'};
 export type CareLogInput = {
  request_type: keyof typeof requestTypes; description: string; response_content: string; notes: string; account_user: string;
  system_id: string | null; category_id: string | null; receiving_department_id: string;

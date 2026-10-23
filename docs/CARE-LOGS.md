@@ -1,6 +1,8 @@
 # Nhật ký CSKH — hướng dẫn sử dụng và triển khai
 
-Nhật ký CSKH lưu công việc riêng của bộ phận CSKH. Bản ghi không đi vào danh sách ticket hoặc thư viện lời giải. Danh mục Hệ thống liên quan, phân mục, phòng ban và nhân sự được dùng chung.
+Nhật ký CSKH lưu công việc riêng của bộ phận CSKH. Bản ghi không đi vào danh sách ticket và không tự xuất hiện trong thư viện lời giải. Người có quyền ghi có thể chọn **Lưu vào thư viện** để tạo bài độc lập; xóa nhật ký vẫn giữ bài đã lưu. Xem [hướng dẫn thư viện](LIBRARY.md). Danh mục Hệ thống liên quan, phân mục, phòng ban và nhân sự được dùng chung.
+
+Phân loại yêu cầu gồm **Hỗ trợ**, **Lỗi**, **Khiếu nại**, **Ý kiến đóng góp**. “Lỗi” dùng được trên form, bộ lọc, chi tiết, nhập Excel và xuất báo cáo; không phải một mục của danh mục Phân mục.
 
 ## 1. Cấp quyền
 
@@ -29,7 +31,7 @@ Mở **Nhật ký CSKH → Tạo nhật ký**. Trường bắt buộc:
 
 **Số tài khoản/user** là trường không bắt buộc, tối đa 255 ký tự, lưu dạng văn bản để giữ nguyên số 0 đầu và tên đăng nhập. Có thể tìm nhật ký bằng tài khoản/user. Mẫu Excel đặt cột N ở dạng Text; ô số bị từ chối vì có thể đã mất số 0 đầu hoặc độ chính xác.
 
-**Kênh phát sinh lỗi** dùng danh sách Hệ thống liên quan. Bộ phận/nhân sự phối hợp là thông tin tùy chọn từ danh mục chung; không tạo ticket hoặc thông báo tới bộ phận khác.
+**Kênh phát sinh** dùng danh sách Hệ thống liên quan. Bộ phận/nhân sự phối hợp là thông tin tùy chọn từ danh mục chung; không tạo ticket hoặc thông báo tới bộ phận khác.
 
 Nhân sự tiếp nhận độc lập với người tạo bản ghi, để hỗ trợ nhập hộ và nhập dữ liệu lịch sử. Form chỉ nhập ngày, không nhập giờ; ngày hoàn thành không được trước ngày tiếp nhận. Ngày mới hoặc ngày thay đổi được lưu lúc 00:00 theo giờ Việt Nam. Khi chỉ sửa nội dung khác, giờ của dữ liệu cũ vẫn được giữ. Khi mở lại bản ghi, hệ thống xóa ngày hoàn thành cũ. Danh sách, chi tiết và báo cáo hiển thị ngày tiếp nhận/hoàn thành theo `dd/mm/yyyy`; thông tin tạo/cập nhật vẫn có giờ.
 

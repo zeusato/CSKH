@@ -13,6 +13,10 @@ async function workbook(){const buffer=await createCareTemplate(catalogs);const 
 async function parse(book:ExcelJS.Workbook){const bytes=new Uint8Array(await book.xlsx.writeBuffer());return readCareWorkbook(bytes.buffer);}
 function raw(values=base):ParsedCareFile{return {raw:[{row:2,values:Object.fromEntries(careColumns.map(([key],i)=>[key,values[i]]))}],errors:[],warnings:[],blankRows:0,hiddenRows:0,otherSheets:[]};}
 describe('Care log dates and catalogs',()=>{
+ it('imports the Lỗi request classification without treating it as a category',()=>{
+  const values=[...base];values[0]='Lỗi';const result=normalizeCareRows(raw(values),catalogs);
+  expect(result.errors).toEqual([]);expect(result.rows[0].request_type).toBe('error');expect(result.rows[0].category_id).toBeNull();
+ });
  it('keeps account/user identifiers as optional text and enforces their length',()=>{
   expect(normalizeCareRows(raw(),catalogs).rows[0].account_user).toBe('001234567890123456');
   const values=[...base];values[13]='  user.name@shs  ';
@@ -48,6 +52,17 @@ describe('Care log dates and catalogs',()=>{
  it('gates care access separately from ticket access',()=>{const p={role:'user',active:true} as Profile;expect(careAccess(p)).toBe('none');expect(careAccess({...p,care_log_access:'write'})).toBe('write');expect(careAccess({...p,role:'viewer',care_log_access:'write'})).toBe('none');expect(careAccess({...p,role:'admin'})).toBe('write');expect(careAccess({...p,role:'admin',active:false})).toBe('none');});
 });
 describe('Real XLSX template and parsing',()=>{
+ it('accepts both channel headers and rejects duplicate old/new channel columns',async()=>{
+  const book=await workbook(),sheet=book.getWorksheet('Du lieu')!;
+  expect(sheet.getCell('C1').text).toBe('Kênh phát sinh');
+  sheet.getRow(2).values=base;
+  expect(normalizeCareRows(await parse(book),catalogs).rows[0].system_id).toBe(department.id);
+  sheet.getCell('C1').value='Kênh phát sinh lỗi';
+  const legacy=normalizeCareRows(await parse(book),catalogs);
+  expect(legacy.errors).toEqual([]);expect(legacy.rows[0].system_id).toBe(department.id);
+  sheet.getCell('O1').value='Kênh phát sinh';
+  await expect(parse(book)).rejects.toThrow('Cột bị lặp: Kênh phát sinh');
+ });
  it('preserves account text in the new template and accepts legacy templates',async()=>{
   const book=await workbook(),sheet=book.getWorksheet('Du lieu')!;
   expect(sheet.getCell('N1').text).toBe('Số tài khoản/user');

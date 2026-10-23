@@ -3,7 +3,7 @@ import {statuses} from './types';
 import {requestTypes,type ImportRow,type ImportIssue} from './care-log-types';
 import {formatDate} from './utils';
 export const careColumns = [
- ['request_type','Phân loại yêu cầu'],['description','Mô tả vấn đề'],['system_id','Kênh phát sinh lỗi'],['category_id','Phân mục'],
+ ['request_type','Phân loại yêu cầu'],['description','Mô tả vấn đề'],['system_id','Kênh phát sinh'],['category_id','Phân mục'],
  ['receiving_department_id','Bộ phận tiếp nhận'],['receiving_staff_id','Nhân sự tiếp nhận'],['coordinating_department_id','Bộ phận phối hợp xử lý'],['coordinating_staff_id','Nhân sự phối hợp xử lý'],
  ['response_content','Nội dung phản hồi từ bộ phận CSKH'],['status','Trạng thái xử lý'],['received_at','Thời gian tiếp nhận'],['completed_at','Thời gian hoàn thành'],['notes','Ghi chú'],['account_user','Số tài khoản/user'],
 ] as const;

@@ -47,7 +47,7 @@ export async function readCareWorkbook(buffer:ArrayBuffer):Promise<ParsedCareFil
  const result:ParsedCareFile={raw:[],errors:[],warnings:[],blankRows:0,hiddenRows:0,otherSheets:book.worksheets.map(s=>s.name).filter(x=>!['Du lieu','Huong dan','Danh muc','_meta'].includes(x))};
  const mapping=new Map<number,string>();const found=new Set<string>();
  sheet.getRow(1).eachCell({includeEmpty:true},(cell,col)=>{
-  const label=normalizeName(cellText(cell));if(!label)return;const match=careColumns.find(([,name])=>normalizeName(name)===label);
+  const label=normalizeName(cellText(cell));if(!label)return;const match=careColumns.find(([key,name])=>normalizeName(name)===label||(key==='system_id'&&label===normalizeName('Kênh phát sinh lỗi')));
   if(!match)throw new Error(`Cột không được hỗ trợ: ${cell.text}`);if(found.has(match[0]))throw new Error(`Cột bị lặp: ${match[1]}`);found.add(match[0]);mapping.set(col,match[0]);
  });
  const missing=careColumns.filter(([key])=>key!=='account_user'&&!found.has(key));if(missing.length)throw new Error(`Thiếu cột: ${missing.map(x=>x[1]).join(', ')}`);
@@ -75,7 +75,7 @@ export async function createCareTemplate(catalogs:Catalogs){
   ['Hoàn thành','Đã xử lý phải có thời gian hoàn thành >= tiếp nhận. Trạng thái khác để trống.'],
   ['Ngày tháng','dd/mm/yyyy. Ví dụ: 17/09/2026. Ngày được lưu lúc 00:00 theo giờ Việt Nam; file cũ có giờ vẫn được giữ nguyên giờ khi nhập.'],
   ['Tránh đảo ngày/tháng','Hai cột ngày được đặt dạng Text. Nhập đủ năm, ví dụ 12/8/2026 là ngày 12 tháng 8. Giữ định dạng Text; khi sao chép hãy dán giá trị. Với ô ngày Excel có sẵn, kiểm tra đúng ngày/tháng trên bản xem trước trước khi xác nhận.'],
-  ['Kênh phát sinh lỗi','Dùng danh sách Hệ thống liên quan hiện có.'],
+  ['Kênh phát sinh','Dùng danh sách Hệ thống liên quan hiện có.'],
   ['Số tài khoản/user','Không bắt buộc, tối đa 255 ký tự. Cột N dạng Text: nhập số tài khoản hoặc user phát sinh vấn đề, giữ nguyên số 0 đầu. Mẫu cũ chưa có cột này vẫn nhập được và để trống tài khoản.'],
   ['Nhân sự','Dùng tên danh bạ thuộc bộ phận tương ứng. Tên trùng phải xử lý trước khi nhập.'],
   ['Phạm vi','Chỉ tạo mới. Dòng ẩn/filter vẫn được nhập; không hỗ trợ công thức, ô gộp hoặc ảnh nhúng.'],

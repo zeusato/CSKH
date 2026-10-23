@@ -1,0 +1,15 @@
+import {supabase} from './supabase';
+import {dateBoundary} from './utils';
+import type {CallCursor,CallFilters,CallInput,CallLog,CallPage,CallPurpose,CallStats,CallImportReview,CallImportRow} from './call-log-types';
+function filters(f:CallFilters){return {...f,from:dateBoundary(f.from),to:dateBoundary(f.to,true)};}
+export async function searchCalls(f:CallFilters,cursor:CallCursor|null=null,signal?:AbortSignal,limit=30):Promise<CallPage>{let q=supabase.rpc('search_call_logs',{p_filters:filters(f),p_cursor:cursor,p_limit:limit});if(signal)q=q.abortSignal(signal);const {data,error}=await q;if(error)throw error;return data;}
+export async function callStats(f:CallFilters,group:string,signal?:AbortSignal):Promise<CallStats>{let q=supabase.rpc('call_log_stats',{p_filters:filters(f),p_group:group});if(signal)q=q.abortSignal(signal);const {data,error}=await q;if(error)throw error;return data;}
+export async function callPurposes():Promise<CallPurpose[]>{const {data,error}=await supabase.from('call_purposes').select('*').order('name');if(error)throw error;return data;}
+export async function savePurpose(name:string,previous?:CallPurpose){const {error}=await(previous?supabase.from('call_purposes').update({name,active:previous.active}).eq('id',previous.id):supabase.from('call_purposes').insert({name}));if(error)throw error;}
+export async function saveCall(input:CallInput,previous?:CallLog):Promise<string>{const {data,error}=await supabase.rpc('save_call_log',{p_input:input,p_id:previous?.id||null,p_version:previous?.version??null,p_followup_version:previous?.followup?.version??null});if(error)throw error;return data;}
+export async function deleteCall(c:CallLog){const {error}=await supabase.rpc('delete_call_log',{p_id:c.id,p_version:c.version,p_followup_version:c.followup?.version??null});if(error)throw error;}
+export async function updateFollowup(c:CallLog,status:string){const {error}=await supabase.rpc('update_call_followup',{p_id:c.id,p_version:c.followup!.version,p_status:status});if(error)throw error;}
+export async function validateCallImport(rows:CallImportRow[]):Promise<CallImportReview>{const {data,error}=await supabase.rpc('validate_call_import',{p_rows:rows});if(error)throw error;return data;}
+export async function commitCallImport(rows:CallImportRow[],requestId:string,fileName:string,token:string):Promise<{id:string;count:number}|{review:CallImportReview}>{const {data,error}=await supabase.rpc('commit_call_import',{p_rows:rows,p_request_id:requestId,p_file_name:fileName,p_token:token});if(error)throw error;return data;}
+export async function callImportResult(requestId:string):Promise<{id:string;count:number}|null>{const {data,error}=await supabase.rpc('get_call_import_result',{p_request_id:requestId});if(error)throw error;return data;}
+export async function allCalls(f:CallFilters){const rows:CallLog[]=[];let cursor:CallCursor|null=null;const snapshot={...f,cutoff:new Date().toISOString()};do{const page=await searchCalls(snapshot,cursor,undefined,500);rows.push(...page.items);if(!page.hasMore)break;cursor=page.nextCursor;if(!cursor)throw new Error('Không đọc được trang tiếp theo.');}while(true);return rows;}

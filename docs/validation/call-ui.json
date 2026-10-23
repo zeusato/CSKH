@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "checks": [
+    "create with contact identifiers, NAV, Vietnam time and follow-up",
+    "complete follow-up without editing call",
+    "repeat call links source and does not copy stale NAV",
+    "customer history and conflict preserves form",
+    "statistics and staff grouping",
+    "Excel export includes all rows and preserves phone",
+    "Excel template, preview without writes and explicit import",
+    "manage purpose catalog",
+    "save and continue and mobile form",
+    "390px layout without page overflow",
+    "viewer has no create, import or edit controls"
+  ],
+  "saveCount": 5,
+  "productionWrites": 0,
+  "checkedAt": "2026-10-23T03:22:52.335Z"
+}

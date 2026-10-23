@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from './supabase';
 import type { Profile } from './types';
 import { errorMessage } from './utils';
+import {callAccess} from './call-log-types';
 import { careAccess } from './care-log-types';
 type AuthValue={session:Session|null;profile:Profile|null;loading:boolean;error:string|null;recovery:boolean;setRecovery:(value:boolean)=>void;refresh:()=>Promise<void>;signOut:()=>Promise<void>};
 const AuthContext=createContext<AuthValue>(null!);
@@ -19,8 +20,8 @@ export function AuthProvider({children}:{children:ReactNode}){
   if(version!==requestVersion.current)return;
   if(e){setProfile(previous=>previous?.id===s.user.id?previous:null);setError(errorMessage(e));setLoading(false);return;}
   if(!data)cache.clear();
-  const access=careAccess(data);
-  if(access!==lastCareAccess.current){await cache.cancelQueries({predicate:q=>String(q.queryKey[0]).startsWith('care-')});cache.removeQueries({predicate:q=>String(q.queryKey[0]).startsWith('care-')});lastCareAccess.current=access;}
+  const access=`${data?.id}-${data?.active}-${data?.role}-${careAccess(data)}-${callAccess(data)}`;
+  if(access!==lastCareAccess.current){await cache.cancelQueries({predicate:q=>/^(care-|library|call-)/.test(String(q.queryKey[0]))});cache.removeQueries({predicate:q=>/^(care-|library|call-)/.test(String(q.queryKey[0]))});lastCareAccess.current=access;}
   if(version!==requestVersion.current)return;
   setProfile(data);setError(!data?'Tài khoản chưa được cấp quyền hoặc đã bị khóa. Liên hệ quản trị viên CSKH.':null);setLoading(false);
  }

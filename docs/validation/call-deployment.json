@@ -1,0 +1,23 @@
+{
+  "verifiedAt": "2026-10-23T03:39:18.027Z",
+  "migration": {
+    "name": "023_call_logs.sql",
+    "sha256": "6241dc59ce0d9616408a2e44ef6f3e180b44f39b7bd0ddae1d6a720fff25273c",
+    "appliedAt": "2026-10-23T03:29:01.268531Z"
+  },
+  "edgeFunction": {
+    "name": "admin-users",
+    "deployed": true,
+    "sourceMatchesLocal": true,
+    "sourceSha256": "002e3577b268d2aa518e394ba1b6bb6a69656820e598923e82be90209b30daa2"
+  },
+  "readOnlySqlChecks": {
+    "adminCanSearchAndReport": true,
+    "restrictedUserCannotReadPurposes": true,
+    "rlsEnabledOnAllThreeTables": true,
+    "directCallWritesDenied": true,
+    "anonymousRpcDenied": true
+  },
+  "frontendDeployed": false,
+  "gitCommitOrPush": false
+}

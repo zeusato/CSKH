@@ -15,7 +15,11 @@
     "db:test": "node --env-file=.env scripts/test-database.mjs",
     "bootstrap": "node --env-file=.env scripts/bootstrap-admin.mjs",
     "test:care-db": "node scripts/test-care-database.mjs",
-    "test:care-ui": "node scripts/test-care-ui.mjs"
+    "test:care-ui": "node scripts/test-care-ui.mjs",
+    "test:library-db": "node scripts/test-library-database.mjs",
+    "test:library-ui": "node scripts/test-library-ui.mjs",
+    "test:call-db": "node scripts/test-call-database.mjs",
+    "test:call-ui": "node scripts/test-call-ui.mjs"
   },
   "engines": {
     "node": "22.x"

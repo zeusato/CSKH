@@ -1,0 +1,28 @@
+{
+  "passed": 21,
+  "checks": [
+    "manual create preserves identifiers, NAV and audit separately",
+    "employees cannot see another owner through table, search or statistics",
+    "forged ownership, metadata and direct writes are rejected",
+    "bad timestamps, negative NAV, missing contact and unsupported status rejected",
+    "cross-midnight calls and no-answer with no end are accepted",
+    "follow-up assigned to another employee grants read but not call edit",
+    "stale task changes and call edits cannot overwrite completion",
+    "reopening a follow-up clears completion and updates version",
+    "Vietnamese search, exact customer history, ranges and keyset pagination",
+    "statistics count unique customer keys and exclude unanswered duration",
+    "due-today, overdue and upcoming use Vietnamese dates",
+    "read and viewer can report but cannot save/import/manage purposes",
+    "manager sees all, reassigns owner and manages purposes",
+    "import preview reports row errors and scoped duplicate warnings",
+    "import commits atomically and repeats same request without duplicate writes",
+    "reused request with different payload is rejected",
+    "changed duplicate warnings require renewed confirmation",
+    "mixed invalid import never writes partially and import results are private",
+    "revoked permissions apply immediately with unchanged JWT",
+    "deleting source call preserves later call and removes only its task",
+    "anonymous and inactive accounts cannot read or invoke writes"
+  ],
+  "productionWrites": 0,
+  "checkedAt": "2026-10-23T03:22:18.736Z"
+}

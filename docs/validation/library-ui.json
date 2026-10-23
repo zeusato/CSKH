@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "productionWrites": 0,
+  "saveCalls": 2,
+  "checks": [
+    "resolved-only ticket button",
+    "preview preserves source",
+    "source deletion retains entry and image",
+    "missing source message",
+    "independent edit",
+    "PDF and Excel download",
+    "unfinished care-log save",
+    "mobile layout",
+    "viewer read-only"
+  ],
+  "checkedAt": "2026-10-23T02:52:59.591Z"
+}

@@ -21,6 +21,10 @@ function wrap(text:string,font:PDFFont,size:number,width:number){
  }return lines;
 }
 export async function exportTicketPdf(ticket:Ticket,catalogs:Catalogs|undefined,attachments:Attachment[]){
+ const rows=[...originFacts(ticket),['Trạng thái',statuses[ticket.status]],['Tiếp nhận',formatDate(ticket.received_at)],['Hoàn thành',formatDate(ticket.completed_at)],['Thời gian xử lý',processingTime(ticket.received_at,ticket.completed_at)],['Hệ thống',catalogs?.systems.find(x=>x.id===ticket.system_id)?.name||'Chưa xác định'],['Phân mục',catalogs?.categories.find(x=>x.id===ticket.category_id)?.name||'Chưa phân mục'],['Bộ phận xử lý',catalogs?.departments.find(x=>x.id===ticket.department_id)?.name||'Chưa xác định'],['Nhân sự xử lý',catalogs?.staff.find(x=>x.id===ticket.staff_id)?.name||'Chưa xác định'],['Người tạo',catalogs?.app_users.find(x=>x.id===ticket.created_by)?.name||'—'],['Ngày tạo ticket',formatDate(ticket.created_at)]];
+ return exportCasePdf(ticket,attachments,rows,'PHIẾU GHI NHẬN & XỬ LÝ');
+}
+export async function exportCasePdf(ticket:{code:string;title:string;description:string;resolution:string},attachments:Pick<Attachment,'url'|'name'|'mime_type'>[],rows:string[][],heading:string){
  const doc=await PDFDocument.create();doc.registerFontkit(fontkit);doc.setTitle(`${ticket.code} · ${ticket.title}`);doc.setAuthor('SHS CSKH');doc.setCreator('SHS Customer Care Workspace');
  const [regularBytes,boldBytes,logoBytes]=await Promise.all([bytes(`${import.meta.env.BASE_URL}fonts/NotoSans-Regular.ttf`,'phông chữ thường'),bytes(`${import.meta.env.BASE_URL}fonts/NotoSans-Bold.ttf`,'phông chữ đậm'),bytes(`${import.meta.env.BASE_URL}LOGO Light.png`,'logo SHS')]);
  const regular=await doc.embedFont(regularBytes,{subset:true}),bold=await doc.embedFont(boldBytes,{subset:true}),logo=await doc.embedPng(logoBytes);
@@ -36,9 +40,9 @@ export async function exportTicketPdf(ticket:Ticket,catalogs:Catalogs|undefined,
    if(value)line(value,10,regular,colors.ink,margin+inset);y-=18;
   }y-=10;
  }
- newPage();line(`PHIẾU GHI NHẬN & XỬ LÝ · ${ticket.code}`,9,regular,colors.orange);y-=31;
+ newPage();line(`${heading} · ${ticket.code}`,9,regular,colors.orange);y-=31;
  for(const value of wrap(ticket.title,bold,20,contentWidth)){ensure(28);line(value,20,bold);y-=28;}y-=9;
- const rows=[...originFacts(ticket),['Trạng thái',statuses[ticket.status]],['Tiếp nhận',formatDate(ticket.received_at)],['Hoàn thành',formatDate(ticket.completed_at)],['Thời gian xử lý',processingTime(ticket.received_at,ticket.completed_at)],['Hệ thống',catalogs?.systems.find(x=>x.id===ticket.system_id)?.name||'Chưa xác định'],['Phân mục',catalogs?.categories.find(x=>x.id===ticket.category_id)?.name||'Chưa phân mục'],['Bộ phận xử lý',catalogs?.departments.find(x=>x.id===ticket.department_id)?.name||'Chưa xác định'],['Nhân sự xử lý',catalogs?.staff.find(x=>x.id===ticket.staff_id)?.name||'Chưa xác định'],['Người tạo',catalogs?.app_users.find(x=>x.id===ticket.created_by)?.name||'—'],['Ngày tạo ticket',formatDate(ticket.created_at)]];
+
  for(const [label,value] of rows){const lines=wrap(value,regular,9,contentWidth-150);const rowHeight=Math.max(23,lines.length*15+8);ensure(rowHeight);page.drawRectangle({x:margin,y:y-rowHeight+7,width:contentWidth,height:rowHeight,color:colors.surface});line(label,9,regular,colors.muted,margin+12);for(let i=0;i<lines.length;i++)page.drawText(lines[i],{x:margin+146,y:y-i*15,font:regular,size:9,color:colors.ink});y-=rowHeight;}y-=4;
  section('Mô tả vấn đề',ticket.description);section('Kết quả xử lý',ticket.resolution,true);
  if(attachments.length){newPage();line('Ảnh đính kèm',16,bold);y-=30;}
