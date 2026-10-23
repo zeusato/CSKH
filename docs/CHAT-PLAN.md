@@ -2,7 +2,7 @@
 
 Lập ngày 23/10/2026 (Asia/Ho_Chi_Minh), cập nhật cùng ngày theo các quyết định ở §11. Dựa trên Chat Server `zeusato/Chat-server` commit `ce1d50b`, **đã deploy lên PoC** `https://chat-server-poc.vercel.app`. Contract gốc nằm ở `D:\Dev\Chat-server\docs\contracts\chat-api.md`; tài liệu cho bên tích hợp là `docs\integration-guide.md` và spec REST `docs\openapi.yaml` (cùng commit). Khi tài liệu này và contract lệch nhau thì **contract thắng**, sau đó cập nhật lại tài liệu này.
 
-Nhãn dùng trong tài liệu: **REQUIRED** = Đại ca đã yêu cầu; **PROPOSED** = đề xuất để bắt đầu code, có thể đổi; **OPEN** = cần Đại ca chốt; **GW-xx** = việc phía Chat Server (mục 9). Phía Gateway đã xong mọi mục đợt này trừ cấu hình PoC (GW-06). **Phía CSKH chưa có gì được triển khai**; dev bắt đầu từ §0.
+Nhãn dùng trong tài liệu: **REQUIRED** = Đại ca đã yêu cầu; **PROPOSED** = đề xuất để bắt đầu code, có thể đổi; **OPEN** = cần Đại ca chốt; **GW-xx** = việc phía Chat Server (mục 9). Phía Gateway đã xong mọi mục đợt này trừ cấu hình PoC (GW-06). **Phía CSKH đã code xong C1–C5** (23/10/2026) và qua kiểm thử với Gateway local; chưa migrate/deploy lên Supabase thật và chưa chạy trên PoC (chờ GW-06). Hướng dẫn vận hành và kiểm thử: [CHAT.md](CHAT.md).
 
 ## 0. Bắt đầu nhanh cho dev
 

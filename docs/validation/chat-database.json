@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "new and existing accounts default to no chat access, admin included",
+    "admin and user accept every chat level",
+    "unknown chat level is rejected",
+    "viewer is limited to read or none",
+    "changing an agent to viewer is rejected by the database",
+    "sync error text is bounded",
+    "signed-in members can read but never write chat columns"
+  ],
+  "checkedAt": "2026-10-23T15:21:27.049Z"
+}

@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "checks": [
+    "menu badge shows unread count",
+    "pool shows unclaimed conversation with care badge and STK filter",
+    "message renders as plain text, only http(s) links, no HTML executed",
+    "claim switches banner to \"Bạn đang chăm sóc\"",
+    "colleague sees who is caring and can join",
+    "reply from helper appears for owner in realtime with real staff name",
+    "customer sees \"CSKH SHS\" only",
+    "internal note visible to colleague, hidden from customer",
+    "draft survives resize and phone back navigation; no horizontal scroll",
+    "agent transfers to colleague; previous owner loses reply",
+    "read-only: no composer, no actions, history incl. notes visible",
+    "revoking access cuts the open chat page"
+  ],
+  "sessionCalls": {
+    "nv1": 2,
+    "nv2": 5,
+    "obs": 4
+  },
+  "customerWrites": "synthetic only",
+  "checkedAt": "2026-10-23T15:21:36.197Z"
+}

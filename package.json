@@ -19,7 +19,11 @@
     "test:library-db": "node scripts/test-library-database.mjs",
     "test:library-ui": "node scripts/test-library-ui.mjs",
     "test:call-db": "node scripts/test-call-database.mjs",
-    "test:call-ui": "node scripts/test-call-ui.mjs"
+    "test:call-ui": "node scripts/test-call-ui.mjs",
+    "test:chat-db": "node scripts/test-chat-database.mjs",
+    "test:chat-gateway": "vitest run src/lib/chat/gateway.integration.test.ts",
+    "test:chat-ui": "node scripts/test-chat-ui.mjs",
+    "deploy:chat-secrets": "node --env-file=.env scripts/deploy-functions.mjs --chat-secrets"
   },
   "engines": {
     "node": "22.x"

@@ -1,7 +1,7 @@
 import type { TicketOrigin } from './ticket-origin';
 export type Status = 'received' | 'in_progress' | 'resolved' | 'cancelled';
 export const statuses: Record<Status, string> = { received: 'Tiếp nhận', in_progress: 'Đang xử lý', resolved: 'Đã xử lý', cancelled: 'Đã hủy' };
-export type Profile = { id: string; name: string; role: 'admin' | 'user' | 'viewer'; active: boolean; department_id: string | null; created_at: string; email?: string; call_log_access?: 'none'|'own'|'read'|'manage'; care_log_access?: 'none'|'read'|'write' };
+export type Profile = { id: string; name: string; role: 'admin' | 'user' | 'viewer'; active: boolean; department_id: string | null; created_at: string; email?: string; call_log_access?: 'none'|'own'|'read'|'manage'; care_log_access?: 'none'|'read'|'write'; chat_access?: 'none'|'read'|'agent'|'supervisor'; chat_synced_at?: string|null; chat_sync_error?: string|null };
 export type CatalogItem = { id: string; name: string; created_at: string; created_by: string | null; department_id?: string };
 export type Catalogs = { categories: CatalogItem[]; systems: CatalogItem[]; departments: CatalogItem[]; staff: CatalogItem[]; app_users: Profile[] };
 export type CatalogName = 'categories' | 'systems' | 'departments' | 'staff';

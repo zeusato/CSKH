@@ -5,3 +5,7 @@ verify_jwt = false
 verify_jwt = false
 # Both handlers explicitly verify session tokens via auth.getUser and current DB membership.
 # The cleanup handler additionally accepts the dedicated secret held in Vault by pg_cron.
+
+[functions.chat-session]
+verify_jwt = false
+# Tự kiểm Supabase JWT + app_users.chat_access trước khi ký assertion cho Chat Gateway.

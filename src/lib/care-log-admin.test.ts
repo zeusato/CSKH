@@ -1,4 +1,4 @@
-import {readFileSync} from 'node:fs';
+import {bundleFunctionSync} from '../../scripts/function-bundle.mjs';
 import {stripTypeScriptTypes} from 'node:module';
 import {describe,it,expect,vi} from 'vitest';
 function api(role='admin',active=true){
@@ -6,7 +6,7 @@ function api(role='admin',active=true){
  const insert=vi.fn(async()=>({error:null})),update=vi.fn(()=>({eq:async()=>({error:null})})),createUser=vi.fn(async()=>({data:{user:{id:'new'}}}));
  const table={select:()=>({eq:()=>({single:async()=>({data:{role,active}}),maybeSingle:async()=>({data:{id:'target'}})})}),insert,update};
  const service={from:()=>table,auth:{getUser:async()=>({data:{user:{id:'admin-id'}}}),admin:{createUser,deleteUser:vi.fn()}}};
- const source=stripTypeScriptTypes(readFileSync('supabase/functions/admin-users/index.ts','utf8').replace(/^import .*;\r?\n/,''));
+ const source=stripTypeScriptTypes(bundleFunctionSync('admin-users').replace(/^import .*;\r?\n/,''));
  new Function('createClient','Deno',source)(()=>service,{env:{get:()=>''},serve:(handler:typeof serve)=>{serve=handler;}});
  return {insert,update,createUser,request:(body:Record<string,unknown>)=>serve(new Request('https://fixture.test',{method:'POST',headers:{Authorization:'Bearer fixture','Content-Type':'application/json'},body:JSON.stringify({id:'00000000-0000-0000-0000-000000000001',name:'Fixture',email:'fixture@example.test',password:'Fixture123!',role:'user',...body})}))};
 }

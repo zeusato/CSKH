@@ -47,6 +47,8 @@ Role **Chỉ xem** (`viewer`) dành cho người được cấp quyền tra cứ
 
 ## Các chức năng
 
+- **Chat khách hàng**: phân hệ riêng tại `/chat`, nối Chat Gateway. Pool chung, thấy ai đang chăm sóc khách, nhận/tham gia/chuyển hội thoại, ghi chú nội bộ, realtime. Quyền Không truy cập / Chỉ xem / Nhân viên / Giám sát; Admin cũng phải được bật. Xem **[docs/CHAT.md](docs/CHAT.md)**.
+
 - **Nhật ký CSKH**: phân hệ riêng với ticket/thư viện; dùng chung danh mục hệ thống, phòng ban và nhân sự. Có quyền Không truy cập / Chỉ xem / Chỉnh sửa, tìm kiếm không dấu, bộ lọc, xuất Excel/PDF, tải mẫu và import Excel có xem trước. Cần áp dụng migration 019 và triển khai bản `admin-users` mới trước khi sử dụng. Xem [hướng dẫn Nhật ký CSKH](docs/CARE-LOGS.md) và [kết quả kiểm thử nâng cấp](docs/validation/care-logs.md).
 
 - Tạo/sửa/xóa ticket; số ticket, người tạo, thời gian tạo và hoàn thành tự ghi bởi database.
@@ -63,6 +65,7 @@ Role **Chỉ xem** (`viewer`) dành cho người được cấp quyền tra cứ
 ```powershell
 npm test
 npm run test:care-db
+npm run test:chat-db
 npm run build
 npm run db:test
 node --env-file=.env scripts/benchmark.mjs

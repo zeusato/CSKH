@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { bundleFunctionSync } from '../../scripts/function-bundle.mjs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
 import { describe, it, expect, vi } from 'vitest';
@@ -15,7 +15,7 @@ function handler() {
  query.maybeSingle = async () => ({ data: { id: 'target' } });
  query.insert = async () => ({ error: null });
  const service = { from: () => query, auth: { getUser: async () => ({ data: { user: { id: 'caller' } } }), admin: { createUser, updateUserById } } };
- const source = readFileSync('supabase/functions/admin-users/index.ts', 'utf8').replace(/^import .*;\r?\n/, '');
+ const source = bundleFunctionSync('admin-users').replace(/^import .*;\r?\n/, '');
  const code = stripTypeScriptTypes(source);
  vm.runInNewContext(code, { createClient: () => service, Deno: { env: { get: () => 'test-only' }, serve: (fn: typeof serve) => { serve = fn; } }, Response, Request });
  return { request: (action: string, password: string) => serve(new Request('https://local.test', { method: 'POST', headers: { Authorization: 'Bearer test-only', 'Content-Type': 'application/json' }, body: JSON.stringify({ action, password, id: '00000000-0000-0000-0000-000000000001', name: 'Test', email: 'test@example.test', role: 'user' }) })), createUser, updateUserById };

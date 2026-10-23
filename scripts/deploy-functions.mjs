@@ -1,12 +1,21 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
+import {bundleFunction} from './function-bundle.mjs';
 const url=process.env.VITE_SUPABASE_URL;const ref=new URL(url).hostname.split('.')[0];const token=process.env.SUPABASE_ACCESS_TOKEN;
 if(!token)throw new Error('Cần SUPABASE_ACCESS_TOKEN trong .env.');
 async function api(path,method='GET',body){const r=await fetch(`https://api.supabase.com/v1/projects/${ref}/${path}`,{method,headers:{Authorization:`Bearer ${token}`,...(body instanceof FormData?{}:{'Content-Type':'application/json'})},body:body instanceof FormData?body:body?JSON.stringify(body):undefined});if(!r.ok)throw new Error(`Management API ${r.status}: ${await r.text()}`);const text=await r.text();return text?JSON.parse(text):null;}
+const functions=['admin-users','storage-cleanup','chat-session'];
 const requested=process.argv.find(x=>x.startsWith('--function='))?.split('=')[1];
-if(requested&&!['admin-users','storage-cleanup'].includes(requested))throw new Error('Unknown function');
-for(const name of requested?[requested]:['admin-users','storage-cleanup']){
- const form=new FormData();form.append('metadata',JSON.stringify({name,entrypoint_path:'index.ts',verify_jwt:false}));form.append('file',new Blob([await fs.readFile(`supabase/functions/${name}/index.ts`,'utf8')],{type:'application/typescript'}),'index.ts');
+if(requested&&!functions.includes(requested))throw new Error('Unknown function');
+// Secret Chat Gateway: khóa đọc từ file (không đưa private key/admin key vào lịch sử shell). Chỉ đặt secret, không deploy.
+if(process.argv.includes('--chat-secrets')){
+ const read=async(file,value)=>file?(await fs.readFile(file,'utf8')).trim():value;
+ const values={CHAT_GATEWAY_URL:process.env.CHAT_GATEWAY_URL,CHAT_ASSERTION_KID:process.env.CHAT_ASSERTION_KID,CHAT_ASSERTION_PRIVATE_KEY:await read(process.env.CHAT_ASSERTION_PRIVATE_KEY_FILE,process.env.CHAT_ASSERTION_PRIVATE_KEY),CHAT_ADMIN_KEY:await read(process.env.CHAT_ADMIN_KEY_FILE,process.env.CHAT_ADMIN_KEY),CHAT_ALLOWED_ORIGINS:process.env.CHAT_ALLOWED_ORIGINS||[process.env.APP_URL,'http://127.0.0.1:5173'].filter(Boolean).join(',')};
+ const missing=Object.entries(values).filter(([,v])=>!v).map(([k])=>k);if(missing.length)throw new Error(`Thiếu ${missing.join(', ')} (xem docs/CHAT.md).`);
+ await api('secrets','POST',Object.entries(values).map(([name,value])=>({name,value})));console.log(`Chat secrets: đã đặt ${Object.keys(values).join(', ')}.`);process.exit(0);
+}
+for(const name of requested?[requested]:functions){
+ const form=new FormData();form.append('metadata',JSON.stringify({name,entrypoint_path:'index.ts',verify_jwt:false}));form.append('file',new Blob([await bundleFunction(name)],{type:'application/typescript'}),'index.ts');
  const result=await api(`functions/deploy?slug=${name}`,'POST',form);console.log(`${name}: ${result.status}`);
 }
 if(process.argv.includes('--functions-only')||requested)process.exit(0);
