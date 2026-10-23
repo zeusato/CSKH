@@ -19,6 +19,14 @@ Phân hệ riêng tại `/chat`. Tin khách gửi từ SHOne đi qua Chat Gatewa
 
 Frontend gọi Gateway trực tiếp bằng access token 5 phút giữ trong RAM. Quyền thao tác do Gateway quyết định; mỗi nút chỉ hiện khi cờ `capabilities` tương ứng là `true`.
 
+## Bật/tắt phân hệ
+
+Cờ `chat_module` trong bảng `public.feature_flags` (migration 025), **mặc định tắt**. Admin bật/tắt ở đầu trang Tài khoản.
+
+- Tắt: menu Chat ẩn với mọi người (kể cả Admin và người đã được cấp quyền), `/chat` chuyển về trang Ticket, `chat-session` trả 403 `CHAT_DISABLED` nên không ai lấy được phiên mới. Người đang mở Chat bị đóng trong khoảng 1 phút (giao diện đọc lại cờ mỗi phút và khi quay lại tab), phiên Gateway bị thu hồi khi trang đóng phân hệ.
+- Khi tắt vẫn cấp quyền và đồng bộ sổ đăng ký được, để chuẩn bị trước khi mở cho người dùng.
+- Chỉ Admin đổi được cờ (RLS); mọi tài khoản đang hoạt động được đọc. Mỗi lần đổi ghi `updated_at`, `updated_by`.
+
 ## Quyền
 
 | Quyền Chat | Vai trò Gateway | Được làm |

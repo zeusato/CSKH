@@ -37,8 +37,9 @@ function eventBatcher(cache:QueryClient,onNew:()=>void){
    else if(['conversation.updated','conversation.assigned','conversation.read'].includes(ev.type)){conversations.add(ev.conversationId);lists=true;}
   }timer??=setTimeout(flush,200);},stop(){clearTimeout(timer);}};
 }
-export function ChatProvider({profile,children}:{profile:Profile|null;children:ReactNode}){
- const cache=useQueryClient();const access=chatAccess(profile);const enabled=access!=='none';
+export function ChatProvider({profile,enabled:moduleOn=true,children}:{profile:Profile|null;enabled?:boolean;children:ReactNode}){
+ // Tắt cờ phân hệ hoặc gỡ quyền: effect dọn dẹp thu hồi phiên Gateway, đóng socket, xóa draft và cache.
+ const cache=useQueryClient();const access=chatAccess(profile);const enabled=moduleOn&&access!=='none';
  const [session,setSession]=useState<ChatSession|null>(null);const [status,setStatus]=useState<SessionStatus>('connecting');const [realtime,setRealtime]=useState<RealtimeStatus>('connecting');
  const [ready,setReady]=useState(false);const [principalId,setPrincipalId]=useState('');const [sound,setSoundState]=useState(readSound);const [attempt,setAttempt]=useState(0);
  const soundRef=useRef(sound);soundRef.current=sound;

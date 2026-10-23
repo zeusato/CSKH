@@ -16,8 +16,8 @@ const assertion=p=>{const now=Math.floor(Date.now()/1000),data=`${b64({alg:'EdDS
 const register=(p,method='PUT')=>fetch(`${api}/admin/staff/cskh-desk/${p.id}`,{method,headers:{authorization:`Bearer ${adminKey}`,'content-type':'application/json'},body:method==='PUT'?JSON.stringify({displayName:p.name,roles:[p.chat_access==='read'?'observer':p.chat_access],queueIds:['support-default']}):undefined});
 async function customerCall(token,method,path,body){const r=await fetch(`${api}${path}`,{method,headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:body?JSON.stringify(body):undefined});if(!r.ok)throw new Error(`${method} ${path} ${r.status} ${await r.text()}`);return r.status===204?null:r.json();}
 const browser=await chromium.launch({headless:true,...(process.env.CARE_BROWSER_PATH?{executablePath:process.env.CARE_BROWSER_PATH}:{})});
-const errors=[],unexpected=[],checks=[],sessionCalls={};
-async function open(name,viewport={width:1440,height:960}){
+const errors=[],unexpected=[],checks=[],sessionCalls={};let chatModule=true;
+async function open(name,viewport={width:1440,height:960},expectChat=true){
  const p=people[name],profile={...p,active:true,department_id:null,created_at:'2026-10-23T02:00:00Z'};
  const user={id:p.id,email:`${name}@example.test`,aud:'authenticated',role:'authenticated',app_metadata:{provider:'email'},user_metadata:{},created_at:profile.created_at};
  const token=[{alg:'HS256',typ:'JWT'},{sub:p.id,exp:Math.floor(Date.now()/1000)+3600,role:'authenticated',session_id:`sid-${p.id}`},'fixture'].map(x=>Buffer.from(typeof x==='string'?x:JSON.stringify(x)).toString('base64url')).join('.');
@@ -26,14 +26,18 @@ async function open(name,viewport={width:1440,height:960}){
  await context.route('**/*.supabase.co/**',async route=>{const path=new URL(route.request().url()).pathname;
   if(path.includes('/auth/v1/token'))return reply(route,{access_token:token,refresh_token:'fixture',expires_in:3600,token_type:'bearer',user});if(path.includes('/auth/v1/user'))return reply(route,user);if(path.includes('/auth/v1/logout'))return reply(route,{});
   if(path.endsWith('/app_users'))return reply(route,profile);
+  if(path.endsWith('/feature_flags'))return reply(route,[{key:'chat_module',enabled:chatModule,updated_at:profile.created_at,updated_by:null}]);
   // Thay Edge Function chat-session: chỉ ký cho persona đang đăng nhập.
   if(path.endsWith('/functions/v1/chat-session')){sessionCalls[name]=(sessionCalls[name]||0)+1;return reply(route,{assertion:assertion(p),gatewayUrl:api});}
-  unexpected.push(`${name}: ${path}`);return reply(route,{message:'Unexpected test endpoint'},400);});
+  // Trang Ticket (đích chuyển hướng khi cờ tắt) không thuộc phạm vi test này.
+  if(expectChat)unexpected.push(`${name}: ${path}`);return reply(route,expectChat?{message:'Unexpected test endpoint'}:[],expectChat?400:200);});
  await page.goto(`${base}/chat`);await page.getByLabel('Email công việc').fill(user.email);await page.getByPlaceholder('Nhập mật khẩu của bạn').fill('Fixture123!');await page.getByRole('button',{name:'Đăng nhập',exact:true}).click();
- await page.getByRole('heading',{name:/Chat khách hàng/}).waitFor();return {page,context};
+ if(expectChat)await page.getByRole('heading',{name:/Chat khách hàng/}).waitFor();return {page,context};
 }
 await fs.mkdir('.local/chat-qa',{recursive:true});let nv1,nv2,obs;
 try{
+ // Cờ chat_module tắt: không có menu, /chat chuyển đi dù tài khoản có quyền.
+ chatModule=false;const off=await open('nv1',undefined,false);await off.page.waitForURL(/\/tickets/);assert.equal(await off.page.getByRole('link',{name:/Chat khách hàng/}).count(),0);assert.equal(sessionCalls.nv1??0,0);await off.context.close();chatModule=true;checks.push('module flag off hides menu and blocks /chat');
  for(const p of Object.values(people))assert.equal((await register(p)).status,200);
  // Khách giả tạo hội thoại bằng proof fixture của Gateway local.
  const proof=execFileSync(process.execPath,['--experimental-strip-types','--no-warnings=ExperimentalWarning','scripts/dev-proof.ts','customerA'],{cwd:process.env.CHAT_IT_SERVER_DIR,encoding:'utf8'}).trim();

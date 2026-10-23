@@ -1,6 +1,7 @@
 {
   "passed": true,
   "checks": [
+    "module flag off hides menu and blocks /chat",
     "menu badge shows unread count",
     "pool shows unclaimed conversation with care badge and STK filter",
     "message renders as plain text, only http(s) links, no HTML executed",
@@ -15,10 +16,10 @@
     "revoking access cuts the open chat page"
   ],
   "sessionCalls": {
-    "nv1": 2,
-    "nv2": 5,
-    "obs": 4
+    "nv1": 1,
+    "nv2": 3,
+    "obs": 2
   },
   "customerWrites": "synthetic only",
-  "checkedAt": "2026-10-23T15:21:36.197Z"
+  "checkedAt": "2026-10-23T15:27:02.995Z"
 }

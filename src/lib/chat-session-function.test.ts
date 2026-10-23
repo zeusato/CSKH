@@ -7,9 +7,9 @@ const b64=(o:object)=>Buffer.from(JSON.stringify(o)).toString('base64url');
 const token=(claims:object)=>`${b64({alg:'HS256'})}.${b64(claims)}.sig`;
 const good=token({sub:'u1',session_id:'sess-1',exp:Math.floor(Date.now()/1000)+3600});
 // Chạy đúng bản bundle sẽ deploy của chat-session (CHAT-PLAN §4, test-chat-session) với Supabase giả.
-function fn(profile:Record<string,unknown>|null,{authOk=true,env={}}:{authOk?:boolean;env?:Record<string,string>}={}){
+function fn(profile:Record<string,unknown>|null,{authOk=true,env={},flag=true}:{authOk?:boolean;env?:Record<string,string>;flag?:boolean|null}={}){
  let serve!:(req:Request)=>Promise<Response>;
- const service={auth:{getUser:async()=>authOk?{data:{user:{id:'u1'}},error:null}:{data:{user:null},error:{message:'bad'}}},from:()=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:profile,error:null})})})})};
+ const service={auth:{getUser:async()=>authOk?{data:{user:{id:'u1'}},error:null}:{data:{user:null},error:{message:'bad'}}},from:(table:string)=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:table==='feature_flags'?(flag===null?null:{enabled:flag}):profile,error:null})})})})};
  const values:Record<string,string>={CHAT_ALLOWED_ORIGINS:'https://cskh.example,http://127.0.0.1:5173',CHAT_ASSERTION_PRIVATE_KEY:privateKey.export({format:'pem',type:'pkcs8'}).toString(),CHAT_ASSERTION_KID:'dev',CHAT_GATEWAY_URL:'http://127.0.0.1:8080',SUPABASE_URL:'https://x.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'service',...env};
  new Function('createClient','Deno',stripTypeScriptTypes(bundleFunctionSync('chat-session').replace(/^import .*;\r?\n/,'')))(()=>service,{env:{get:(k:string)=>values[k]},serve:(h:typeof serve)=>{serve=h;}});
  return (auth:string|null=good,origin:string|null='https://cskh.example',method='POST')=>serve(new Request('https://fn.test',{method,headers:{...(auth?{Authorization:`Bearer ${auth}`}:{}),...(origin?{Origin:origin}:{})}}));
@@ -29,5 +29,6 @@ describe('Edge Function chat-session',()=>{
  it('viewer có read → 200; viewer có agent (dữ liệu sai) → 403',async()=>{expect((await fn({...user,role:'viewer',chat_access:'read'})()).status).toBe(200);expect((await fn({...user,role:'viewer',chat_access:'agent'})()).status).toBe(403);});
  it('token sai hoặc thiếu → 401',async()=>{expect((await fn(user,{authOk:false})()).status).toBe(401);expect((await fn(user)(null)).status).toBe(401);});
  it('origin lạ bị chặn, kể cả preflight',async()=>{expect((await fn(user)(good,'https://evil.example')).status).toBe(403);expect((await fn(user)(good,'https://evil.example','OPTIONS')).status).toBe(403);expect((await fn(user)(good,'http://127.0.0.1:5173','OPTIONS')).status).toBe(200);});
+ it('cờ chat_module tắt hoặc chưa có → 403 CHAT_DISABLED, không ký',async()=>{for(const flag of [false,null]){const res=await fn(user,{flag})();expect(res.status).toBe(403);expect(await res.json()).toEqual({error:'Phân hệ Chat đang tắt.',code:'CHAT_DISABLED'});}});
  it('thiếu secret → 503, không lộ chi tiết',async()=>{const res=await fn(user,{env:{CHAT_ASSERTION_PRIVATE_KEY:''}})();expect(res.status).toBe(503);expect(await res.json()).toEqual({error:'Chưa cấu hình Chat Gateway.'});});
 });

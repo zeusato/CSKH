@@ -7,7 +7,11 @@
     "viewer is limited to read or none",
     "changing an agent to viewer is rejected by the database",
     "sync error text is bounded",
-    "signed-in members can read but never write chat columns"
+    "signed-in members can read but never write chat columns",
+    "chat module flag defaults to off and is readable by active members",
+    "only admins can switch the flag; change is stamped",
+    "members cannot add, delete or rename flags",
+    "inactive accounts cannot read flags"
   ],
-  "checkedAt": "2026-10-23T15:21:27.049Z"
+  "checkedAt": "2026-10-23T15:27:54.700Z"
 }
