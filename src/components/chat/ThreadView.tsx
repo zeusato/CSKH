@@ -40,7 +40,7 @@ export function ThreadView({id}:{id:string}){
  return <section className="chat-thread" aria-label={`Hội thoại với ${c.customer?.displayName||'khách hàng'}`}>
   <header className="chat-thread-head">
    <Button variant="ghost" className="icon-button chat-back" aria-label="Quay lại danh sách" onClick={()=>navigate('/chat')}><ArrowLeft size={20}/></Button>
-   <div className="chat-thread-title"><h2>{c.customer?.displayName||'Khách hàng'}</h2><p><span className="chat-account">STK {c.accountRef}</span><span>{c.subject}</span></p></div>
+   <div className="chat-thread-title"><h2 title={c.customer?.displayName||'Khách hàng'}>{c.customer?.displayName||'Khách hàng'}</h2><p><span className="chat-account">STK {c.accountRef}</span><span title={c.subject}>{c.subject}</span></p></div>
    <span className={`chat-status chat-status-${c.status}`}>{statusLabels[c.status]||'Không rõ'}</span>
   </header>
   {c.syncState==='failed'&&<div className="chat-alert chat-alert-danger" role="alert"><TriangleAlert size={17}/>Hội thoại chưa đồng bộ được với máy chủ chat.<Button variant="ghost" onClick={refresh}><RefreshCw size={15}/>Tải lại</Button></div>}
@@ -64,6 +64,8 @@ function MessageList({c}:{c:Conversation}){
   if(anchor.current){el.scrollTop=anchor.current.top+(el.scrollHeight-anchor.current.height);anchor.current=null;}else if(stick.current)el.scrollTop=el.scrollHeight;
  },[items.length,last]);
  useEffect(()=>{stick.current=true;lastRead.current='';},[c.id]);
+ // Keep the latest message visible when the composer grows or the viewport changes.
+ useEffect(()=>{const el=box.current;if(!el)return;const observer=new ResizeObserver(()=>{if(stick.current)el.scrollTop=el.scrollHeight;});observer.observe(el);return()=>observer.disconnect();},[]);
  function scroll(){const el=box.current;if(!el)return;stick.current=el.scrollHeight-el.scrollTop-el.clientHeight<80;
   if(el.scrollTop<60&&messages.hasNextPage&&!messages.isFetchingNextPage){anchor.current={height:el.scrollHeight,top:el.scrollTop};void messages.fetchNextPage();}}
  // Chỉ đánh dấu đã đọc khi tab đang hiển thị và tin cuối thực sự nằm trong vùng nhìn thấy. Mốc đọc chỉ tăng.

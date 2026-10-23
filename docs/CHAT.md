@@ -67,6 +67,7 @@ Bundle frontend không được chứa `BEGIN PRIVATE KEY`, `CHAT_ADMIN_KEY` hay
 
 ## Hành vi chính
 
+- **Không gian làm việc:** Chat chiếm toàn bộ phần còn lại của cửa sổ, không dùng padding/max-width/footer của các trang nghiệp vụ. Danh sách và lịch sử tin nhắn cuộn riêng; desktop có nút ẩn/hiện danh sách. Ô soạn tự tăng chiều cao theo nội dung, có giới hạn để giữ chỗ đọc tin. Nhận/chuyển/đóng hội thoại ở thanh chính; thêm người hỗ trợ, chờ khách, trả lại pool và rời hỗ trợ trong menu **Thêm**. Trên điện thoại, mở hội thoại sẽ thay danh sách; quay lại vẫn giữ nháp.
 - **Pool:** tab Chưa nhận / Của tôi / Đang có người chăm sóc / Chờ khách / Đã xong. Tìm STK là so khớp đúng cả chuỗi. Gateway không có API đếm: chỉ hiện số chưa đọc của các dòng đã tải và nút "Còn nữa".
 - **Người chăm sóc:** badge trên mỗi dòng và banner cố định đầu hội thoại. Nhận đồng thời: chỉ một người thắng, người kia thấy thông báo và nút Tham gia hỗ trợ.
 - **Tin nhắn:** plain text, tự nhận link `http/https`, mở tab mới với `noopener noreferrer`. Không render HTML. Ghi chú nội bộ nền vàng, khách không thấy. Khách chỉ thấy tên "CSKH SHS".
@@ -83,6 +84,7 @@ Bundle frontend không được chứa `BEGIN PRIVATE KEY`, `CHAT_ADMIN_KEY` hay
 | `npm run test:chat-db` | Migration 024 trên PostgreSQL cô lập (PGlite) |
 | `npm run test:chat-gateway` | Kịch bản nghiệm thu CHAT-PLAN §8.2 với Gateway local thật |
 | `npm run test:chat-ui` | Trình duyệt headless: hai nhân viên + người chỉ xem với Gateway local thật, Supabase giả lập |
+| `node scripts/test-chat-layout.mjs` | Kiểm tra bố cục desktop/tablet/phone, ô soạn tự giãn, giữ nháp, menu và chuyển trang; HTTP/WebSocket đều giả lập. Dùng cùng biến Playwright/URL bên dưới. Báo cáo `docs/validation/chat-layout.json` |
 
 ### Kiểm thử với Gateway local
 

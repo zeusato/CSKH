@@ -1,4 +1,4 @@
-import { useEffect,useRef,useState,type KeyboardEvent } from 'react';
+import { useEffect,useLayoutEffect,useRef,useState,type KeyboardEvent } from 'react';
 import { Send,LoaderCircle,TriangleAlert,RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { sendMessage } from '../../lib/chat/api';
@@ -21,6 +21,14 @@ export function Composer({c,onSent}:{c:Conversation;onSent:()=>void}){
  // Mở hội thoại luôn ở chế độ Trả lời khách, trừ khi draft đang dở ở chế độ ghi chú.
  const [draft,setLocal]=useState<Draft>(()=>getDraft(principalId,c.id));const [pending,setPending]=useState<Pending[]>([]);const sending=pending.some(p=>p.state==='sending');
  const area=useRef<HTMLTextAreaElement>(null);
+ // Start with one line; grow only as needed, keeping room for message history.
+ useLayoutEffect(()=>{
+  const el=area.current;if(!el)return;
+  const resize=()=>{el.style.height='0px';el.style.height=`${el.scrollHeight+2}px`;};
+  resize();const parent=el.parentElement;let width=parent?.clientWidth;
+  const observer=new ResizeObserver(()=>{if(parent&&parent.clientWidth!==width){width=parent.clientWidth;resize();}});if(parent)observer.observe(parent);
+  return ()=>observer.disconnect();
+ },[draft.text]);
  useEffect(()=>{setLocal(getDraft(principalId,c.id));setPending([]);},[principalId,c.id]);
  const update=(d:Draft)=>{setLocal(d);setDraft(principalId,c.id,d);};
  const block=composerBlock(c,draft.mode);const length=codePoints(draft.text);const tooLong=length>LIMITS.textMaxChars;const empty=!draft.text.trim();
@@ -47,9 +55,9 @@ export function Composer({c,onSent}:{c:Conversation;onSent:()=>void}){
    <button type="button" role="radio" aria-checked={draft.mode==='public'} onClick={()=>update({...draft,mode:'public'})}>Trả lời khách</button>
    <button type="button" role="radio" aria-checked={draft.mode==='internal'} onClick={()=>update({...draft,mode:'internal'})}>Ghi chú nội bộ</button>
   </div>
-  <textarea ref={area} rows={3} value={draft.text} disabled={Boolean(block)} aria-label={draft.mode==='internal'?'Ghi chú nội bộ':'Trả lời khách'} aria-invalid={tooLong} placeholder={(draft.mode==='internal'?'Ghi chú cho đồng nghiệp — khách không thấy':'Nhập tin trả lời khách… (Enter để gửi, Shift+Enter xuống dòng)')} onChange={e=>update({...draft,text:e.target.value})} onKeyDown={key}/>
+  <textarea ref={area} rows={1} value={draft.text} disabled={Boolean(block)} aria-label={draft.mode==='internal'?'Ghi chú nội bộ':'Trả lời khách'} aria-invalid={tooLong} placeholder={(draft.mode==='internal'?'Ghi chú cho đồng nghiệp — khách không thấy':'Nhập tin trả lời khách…')} onChange={e=>update({...draft,text:e.target.value})} onKeyDown={key}/>
   <div className="chat-composer-foot">
-   <small className="muted">{draft.mode==='internal'?'Chỉ nhân viên CSKH thấy ghi chú này.':'Khách sẽ thấy tên: CSKH SHS'}</small>
+   <small className="muted">{draft.mode==='internal'?'Chỉ nhân viên CSKH thấy ghi chú này.':'Khách sẽ thấy tên: CSKH SHS'}<span className="chat-key-hint"> · Enter gửi · Shift+Enter xuống dòng</span></small>
    <small className={tooLong?'danger-text':'muted'}>{length.toLocaleString('vi-VN')}/{LIMITS.textMaxChars.toLocaleString('vi-VN')}</small>
    <Button onClick={()=>void send()} disabled={Boolean(block)||empty||tooLong||sending}><Send size={17}/>{draft.mode==='internal'?'Lưu ghi chú':'Gửi'}</Button>
   </div>

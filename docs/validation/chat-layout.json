@@ -1,0 +1,328 @@
+{
+  "passed": true,
+  "checks": [
+    "full-height workspace, collapsible queue, secondary actions accessible by keyboard",
+    "composer expands with text, stays bounded, sends by Enter and shrinks after sending",
+    "desktop, tablet, phone and reduced-height viewport: no page overflow, visible composer, draft retained",
+    "dark theme works; leaving Chat restores the ordinary page layout"
+  ],
+  "measurements": [
+    {
+      "label": "desktop-1684x852",
+      "width": 1684,
+      "height": 852,
+      "bodyWidth": 1684,
+      "bodyHeight": 852,
+      "layout": {
+        "x": 220,
+        "y": 96,
+        "width": 1464,
+        "height": 756,
+        "bottom": 852
+      },
+      "history": {
+        "x": 580,
+        "y": 208.375,
+        "width": 1104,
+        "height": 492.484375,
+        "bottom": 700.859375
+      },
+      "composer": {
+        "x": 580,
+        "y": 700.859375,
+        "width": 1104,
+        "height": 151.140625,
+        "bottom": 852
+      },
+      "input": {
+        "x": 598,
+        "y": 756,
+        "width": 1068,
+        "height": 46,
+        "bottom": 802
+      }
+    },
+    {
+      "label": "collapsed-pool",
+      "width": 1684,
+      "height": 852,
+      "bodyWidth": 1684,
+      "bodyHeight": 852,
+      "layout": {
+        "x": 220,
+        "y": 96,
+        "width": 1464,
+        "height": 756,
+        "bottom": 852
+      },
+      "history": {
+        "x": 220,
+        "y": 208.375,
+        "width": 1464,
+        "height": 492.484375,
+        "bottom": 700.859375
+      },
+      "composer": {
+        "x": 220,
+        "y": 700.859375,
+        "width": 1464,
+        "height": 151.140625,
+        "bottom": 852
+      },
+      "input": {
+        "x": 238,
+        "y": 756,
+        "width": 1428,
+        "height": 46,
+        "bottom": 802
+      }
+    },
+    {
+      "label": "long-draft",
+      "width": 1684,
+      "height": 852,
+      "bodyWidth": 1684,
+      "bodyHeight": 852,
+      "layout": {
+        "x": 220,
+        "y": 96,
+        "width": 1464,
+        "height": 756,
+        "bottom": 852
+      },
+      "history": {
+        "x": 580,
+        "y": 208.375,
+        "width": 1104,
+        "height": 378.484375,
+        "bottom": 586.859375
+      },
+      "composer": {
+        "x": 580,
+        "y": 586.859375,
+        "width": 1104,
+        "height": 265.140625,
+        "bottom": 852
+      },
+      "input": {
+        "x": 598,
+        "y": 642,
+        "width": 1068,
+        "height": 160,
+        "bottom": 802
+      }
+    },
+    {
+      "label": "1366x768",
+      "width": 1366,
+      "height": 768,
+      "bodyWidth": 1366,
+      "bodyHeight": 768,
+      "layout": {
+        "x": 220,
+        "y": 96,
+        "width": 1146,
+        "height": 672,
+        "bottom": 768
+      },
+      "history": {
+        "x": 547.828125,
+        "y": 208.375,
+        "width": 818.171875,
+        "height": 408.484375,
+        "bottom": 616.859375
+      },
+      "composer": {
+        "x": 547.828125,
+        "y": 616.859375,
+        "width": 818.171875,
+        "height": 151.140625,
+        "bottom": 768
+      },
+      "input": {
+        "x": 565.828125,
+        "y": 672,
+        "width": 782.171875,
+        "height": 46,
+        "bottom": 718
+      }
+    },
+    {
+      "label": "1024x600",
+      "width": 1024,
+      "height": 600,
+      "bodyWidth": 1024,
+      "bodyHeight": 600,
+      "layout": {
+        "x": 200,
+        "y": 96,
+        "width": 824,
+        "height": 504,
+        "bottom": 600
+      },
+      "history": {
+        "x": 480,
+        "y": 238.96875,
+        "width": 544,
+        "height": 209.890625,
+        "bottom": 448.859375
+      },
+      "composer": {
+        "x": 480,
+        "y": 448.859375,
+        "width": 544,
+        "height": 151.140625,
+        "bottom": 600
+      },
+      "input": {
+        "x": 498,
+        "y": 504,
+        "width": 508,
+        "height": 46,
+        "bottom": 550
+      }
+    },
+    {
+      "label": "768x1024",
+      "width": 768,
+      "height": 1024,
+      "bodyWidth": 768,
+      "bodyHeight": 1024,
+      "layout": {
+        "x": 0,
+        "y": 96,
+        "width": 768,
+        "height": 928,
+        "bottom": 1024
+      },
+      "history": {
+        "x": 0,
+        "y": 206.140625,
+        "width": 768,
+        "height": 666.71875,
+        "bottom": 872.859375
+      },
+      "composer": {
+        "x": 0,
+        "y": 872.859375,
+        "width": 768,
+        "height": 151.140625,
+        "bottom": 1024
+      },
+      "input": {
+        "x": 12,
+        "y": 928,
+        "width": 744,
+        "height": 46,
+        "bottom": 974
+      }
+    },
+    {
+      "label": "390x844",
+      "width": 390,
+      "height": 844,
+      "bodyWidth": 390,
+      "bodyHeight": 844,
+      "layout": {
+        "x": 0,
+        "y": 92,
+        "width": 390,
+        "height": 752,
+        "bottom": 844
+      },
+      "history": {
+        "x": 0,
+        "y": 236.59375,
+        "width": 390,
+        "height": 448.40625,
+        "bottom": 685
+      },
+      "composer": {
+        "x": 0,
+        "y": 685,
+        "width": 390,
+        "height": 159,
+        "bottom": 844
+      },
+      "input": {
+        "x": 12,
+        "y": 744,
+        "width": 366,
+        "height": 46,
+        "bottom": 790
+      }
+    },
+    {
+      "label": "390x560",
+      "width": 390,
+      "height": 560,
+      "bodyWidth": 390,
+      "bodyHeight": 560,
+      "layout": {
+        "x": 0,
+        "y": 92,
+        "width": 390,
+        "height": 468,
+        "bottom": 560
+      },
+      "history": {
+        "x": 0,
+        "y": 236.59375,
+        "width": 390,
+        "height": 164.40625,
+        "bottom": 401
+      },
+      "composer": {
+        "x": 0,
+        "y": 401,
+        "width": 390,
+        "height": 159,
+        "bottom": 560
+      },
+      "input": {
+        "x": 12,
+        "y": 460,
+        "width": 366,
+        "height": 46,
+        "bottom": 506
+      }
+    },
+    {
+      "label": "320x568",
+      "width": 320,
+      "height": 568,
+      "bodyWidth": 320,
+      "bodyHeight": 568,
+      "layout": {
+        "x": 0,
+        "y": 92,
+        "width": 320,
+        "height": 476,
+        "bottom": 568
+      },
+      "history": {
+        "x": 0,
+        "y": 236.59375,
+        "width": 320,
+        "height": 172.40625,
+        "bottom": 409
+      },
+      "composer": {
+        "x": 0,
+        "y": 409,
+        "width": 320,
+        "height": 159,
+        "bottom": 568
+      },
+      "input": {
+        "x": 12,
+        "y": 468,
+        "width": 296,
+        "height": 46,
+        "bottom": 514
+      }
+    }
+  ],
+  "backend": "mocked; no production requests",
+  "checkedAt": "2026-10-23T16:23:38.849Z"
+}
