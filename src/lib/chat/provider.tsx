@@ -6,6 +6,7 @@ import { supabase } from '../supabase';
 import type { Profile } from '../types';
 import { chatAccess,type ChatAccess } from './access';
 import { listQueue,type QueueTab } from './api';
+import { refreshChatQueries } from './cache';
 import type { ChatEvent } from './contract';
 import { clearDrafts } from './drafts';
 import { ChatRealtime,type RealtimeStatus } from './realtime';
@@ -26,16 +27,17 @@ async function getProof():Promise<Proof>{
 }
 function readSound(){try{return localStorage.getItem('cskh-chat-sound')!=='off';}catch{return true;}}
 function beep(){try{const ctx=new AudioContext(),o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(0.08,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.25);o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.25);o.onended=()=>void ctx.close();}catch{/* Trình duyệt chặn âm thanh */}}
-// Gom invalidate theo ~200 ms để một loạt event không gây hàng chục lần refetch.
+// Message content refreshes immediately; batch queue/metadata updates for 200 ms.
 function eventBatcher(cache:QueryClient,onNew:()=>void){
- let messages=new Set<string>(),conversations=new Set<string>(),lists=false,timer:ReturnType<typeof setTimeout>|undefined;
- const flush=()=>{timer=undefined;const m=messages,c=conversations,l=lists;messages=new Set();conversations=new Set();lists=false;
-  m.forEach(id=>void cache.invalidateQueries({queryKey:['chat-messages',id]}));c.forEach(id=>void cache.invalidateQueries({queryKey:['chat-conversation',id]}));if(l)void cache.invalidateQueries({queryKey:['chat-queue']});};
- return {add(events:ChatEvent[]){for(const ev of events){
-   if(ev.type==='message.created'){messages.add(ev.conversationId);conversations.add(ev.conversationId);lists=true;}
+ let conversations=new Set<string>(),lists=false,timer:ReturnType<typeof setTimeout>|undefined;
+ const flush=()=>{timer=undefined;const c=conversations,l=lists;conversations=new Set();lists=false;
+  c.forEach(id=>refreshChatQueries(cache,{queryKey:['chat-conversation',id]}));if(l)refreshChatQueries(cache,{queryKey:['chat-queue']});};
+ return {add(events:ChatEvent[]){const messages=new Set<string>();for(const ev of events){
+   if(ev.type==='message.created'){messages.add(ev.conversationId);lists=true;}
    else if(ev.type==='conversation.created'){lists=true;onNew();}
-   else if(['conversation.updated','conversation.assigned','conversation.read'].includes(ev.type)){conversations.add(ev.conversationId);lists=true;}
-  }timer??=setTimeout(flush,200);},stop(){clearTimeout(timer);}};
+   else if(ev.type==='conversation.read'){lists=true;}
+   else if(['conversation.updated','conversation.assigned'].includes(ev.type)){conversations.add(ev.conversationId);lists=true;}
+  }messages.forEach(id=>refreshChatQueries(cache,{queryKey:['chat-messages',id]}));timer??=setTimeout(flush,200);},stop(){clearTimeout(timer);}};
 }
 export function ChatProvider({profile,enabled:moduleOn=true,children}:{profile:Profile|null;enabled?:boolean;children:ReactNode}){
  // Tắt cờ phân hệ hoặc gỡ quyền: effect dọn dẹp thu hồi phiên Gateway, đóng socket, xóa draft và cache.
@@ -45,20 +47,21 @@ export function ChatProvider({profile,enabled:moduleOn=true,children}:{profile:P
  const soundRef=useRef(sound);soundRef.current=sound;
  useEffect(()=>{
   if(!enabled||!profile)return;
-  const s=new ChatSession({getProof});let realtimeClient:ChatRealtime|null=null;let fallback:ReturnType<typeof setTimeout>|undefined;let alive=true;
+  const s=new ChatSession({getProof});let realtimeClient:ChatRealtime|null=null;let alive=true;
   const forbidden=()=>{if(!alive)return;setStatus('forbidden');realtimeClient?.stop();cache.removeQueries({predicate:q=>isChatKey(q.queryKey[0])});clearDrafts();};
   const batch=eventBatcher(cache,()=>{if(soundRef.current&&document.visibilityState==='visible')beep();});
   setSession(s);setStatus('connecting');setRealtime('connecting');setReady(false);
   const unsubscribe=s.subscribe(()=>{if(!alive)return;setStatus(s.status);if(s.status==='forbidden')forbidden();if(s.grant)setPrincipalId(s.grant.principal.id);});
   void s.renew().then(()=>{
    if(!alive)return;
-   // Không mất tin lúc khởi động: mở socket và chờ `ready` trước rồi mới bật query; event đến trong lúc tải sẽ invalidate và tải lại.
-   realtimeClient=new ChatRealtime(s,{onEvents:batch.add,onSync:()=>void cache.invalidateQueries({predicate:q=>isChatKey(q.queryKey[0])}),onReady:()=>setReady(true),onStatus:setRealtime,onForbidden:forbidden});
+   // HTTP loads immediately. Reconcile once ready closes the snapshot/socket gap,
+   // including when ready/events arrive while that first snapshot is in flight.
+   const sync=()=>refreshChatQueries(cache,{predicate:q=>isChatKey(q.queryKey[0])});
+   setReady(true);
+   realtimeClient=new ChatRealtime(s,{onEvents:batch.add,onSync:sync,onReady:sync,onStatus:setRealtime,onForbidden:forbidden});
    realtimeClient.start();
-   // Socket không lên được thì vẫn tải dữ liệu qua HTTP sau 8 giây; chip mất kết nối báo cho người dùng.
-   fallback=setTimeout(()=>{if(alive)setReady(true);},8000);
   }).catch(()=>{});
-  return ()=>{alive=false;clearTimeout(fallback);batch.stop();unsubscribe();realtimeClient?.stop();void s.stop();clearDrafts();cache.removeQueries({predicate:q=>isChatKey(q.queryKey[0])});setSession(null);setReady(false);setPrincipalId('');};
+  return ()=>{alive=false;batch.stop();unsubscribe();realtimeClient?.stop();void s.stop();clearDrafts();cache.removeQueries({predicate:q=>isChatKey(q.queryKey[0])});setSession(null);setReady(false);setPrincipalId('');};
  },[enabled,profile?.id,access,cache,attempt]);
  const live=enabled&&status==='ready'&&ready;
  const mine=useInfiniteQuery(queueOptions(session,'mine','',live&&access!=='read'));const unclaimed=useInfiniteQuery(queueOptions(session,'unclaimed','',live&&access!=='read'));

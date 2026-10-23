@@ -23,6 +23,7 @@
     "test:chat-db": "node scripts/test-chat-database.mjs",
     "test:chat-gateway": "vitest run src/lib/chat/gateway.integration.test.ts",
     "test:chat-ui": "node scripts/test-chat-ui.mjs",
+    "test:chat-latency": "node scripts/test-chat-latency.mjs",
     "deploy:chat-secrets": "node --env-file=.env scripts/deploy-functions.mjs --chat-secrets"
   },
   "engines": {

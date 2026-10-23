@@ -50,11 +50,13 @@ export class ChatSession{
  }
  async token(){const g=this.grant;if(!g||Date.parse(g.expiresAt)-this.now()<45000)return (await this.renew()).accessToken;return g.accessToken;}
  invalidate(token?:string){if(!token||this.grant?.accessToken===token)this.grant=null;}
- async call<T>(method:string,path:string,body?:unknown,retried=false):Promise<T>{
+ async call<T>(method:string,path:string,body?:unknown,options:{signal?:AbortSignal}={},retried=false):Promise<T>{
+  options.signal?.throwIfAborted();
   const token=await this.token();
-  const res=await this.fetch(`${this.base}${path}`,{method,credentials:'omit',headers:{authorization:`Bearer ${token}`,...(body===undefined?{}:{'content-type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)});
+  options.signal?.throwIfAborted();
+  const res=await this.fetch(`${this.base}${path}`,{method,credentials:'omit',signal:options.signal,headers:{authorization:`Bearer ${token}`,...(body===undefined?{}:{'content-type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)});
   // 401: gia hạn một lần rồi thử lại; vẫn 401 thì báo lỗi.
-  if(res.status===401&&!retried){this.invalidate(token);return this.call<T>(method,path,body,true);}
+  if(res.status===401&&!retried){this.invalidate(token);return this.call<T>(method,path,body,options,true);}
   if(!res.ok){const e=await ChatError.from(res);if(res.status===401)this.set('error');throw e;}
   return (res.status===204?undefined:await res.json()) as T;
  }

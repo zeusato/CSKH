@@ -17,7 +17,9 @@ export async function listQueue(s:ChatSession,tab:QueueTab,accountRef:string,cur
  return {items:page.items.map(safeConversation),nextCursor:page.nextCursor};
 }
 export const getConversation=async(s:ChatSession,cid:string)=>safeConversation(await s.call<Conversation>('GET',`/conversations/${id(cid)}`));
-export const listMessages=(s:ChatSession,cid:string,cursor:string|null)=>s.call<Page<Message>>('GET',`/conversations/${id(cid)}/messages${qs({cursor,limit:String(LIMITS.pageSize)})}`);
+// Gateway requests one extra item for its cursor. 19 + 1 fits one Chatwoot page;
+// the old default of 50 required up to three upstream reads on every new message.
+export const listMessages=(s:ChatSession,cid:string,cursor:string|null,signal?:AbortSignal)=>s.call<Page<Message>>('GET',`/conversations/${id(cid)}/messages${qs({cursor,limit:String(cursor?LIMITS.pageSize:19)})}`,undefined,{signal});
 export const listMembers=(s:ChatSession)=>s.call<{items:QueueMember[]}>('GET',`/queues/${QUEUE_ID}/members`).then(r=>r.items);
 export const markRead=(s:ChatSession,cid:string,lastReadMessageId:string)=>s.call<{lastReadMessageId:string}>('POST',`/conversations/${id(cid)}/read`,{lastReadMessageId});
 export type Action={kind:'claim'|'join'|'leave'}|{kind:'release';reason?:string}|{kind:'transfer';targetPrincipalId:string;reason?:string}|{kind:'status';status:'open'|'pending_customer'|'resolved'}|{kind:'addParticipant';principalId:string}|{kind:'removeParticipant';principalId:string};

@@ -15,9 +15,12 @@ Deno.serve(async(req:Request)=>{
   const service=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false}});
   const {data:auth,error:authError}=await service.auth.getUser(token);if(authError||!auth.user)return reply({error:'Phiên đăng nhập không hợp lệ.'},401);
   // Cờ phân hệ tắt thì không cấp phiên, kể cả khi giao diện cũ còn mở.
-  const flag=await service.from('feature_flags').select('enabled').eq('key','chat_module').maybeSingle();if(flag.error)throw flag.error;
+  const [flag,{data:profile,error}]=await Promise.all([
+   service.from('feature_flags').select('enabled').eq('key','chat_module').maybeSingle(),
+   service.from('app_users').select('id,name,role,active,chat_access').eq('id',auth.user.id).maybeSingle(),
+  ]);if(flag.error)throw flag.error;
   if(flag.data?.enabled!==true)return reply({error:'Phân hệ Chat đang tắt.',code:'CHAT_DISABLED'},403);
-  const {data:profile,error}=await service.from('app_users').select('id,name,role,active,chat_access').eq('id',auth.user.id).maybeSingle();if(error)throw error;
+  if(error)throw error;
   // Lớp chặn thứ hai: người đã bị khóa hoặc gỡ quyền không lấy được phiên mới, kể cả khi Gateway chưa kịp hủy đăng ký.
   if(!profile||!chatEntitled(profile as ChatProfile))return reply({error:'Tài khoản chưa được cấp quyền Chat.'},403);
   const pem=Deno.env.get('CHAT_ASSERTION_PRIVATE_KEY'),kid=Deno.env.get('CHAT_ASSERTION_KID'),gatewayUrl=Deno.env.get('CHAT_GATEWAY_URL');

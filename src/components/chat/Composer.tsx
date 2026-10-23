@@ -1,11 +1,13 @@
 import { useEffect,useLayoutEffect,useRef,useState,type KeyboardEvent } from 'react';
 import { Send,LoaderCircle,TriangleAlert,RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import { sendMessage } from '../../lib/chat/api';
 import { codePoints,LIMITS,type Conversation } from '../../lib/chat/contract';
 import { getDraft,setDraft,type Draft } from '../../lib/chat/drafts';
 import { chatError } from '../../lib/chat/errors';
 import { useChat } from '../../lib/chat/provider';
+import { addSentMessage,messageKey } from '../../lib/chat/messages';
 import { Button } from '../ui';
 type Pending={clientMessageId:string;text:string;state:'sending'|'unknown'};
 export function composerBlock(c:Conversation,mode:Draft['mode']):string|null{
@@ -16,8 +18,8 @@ export function composerBlock(c:Conversation,mode:Draft['mode']):string|null{
  if(c.capabilities.canReply)return null;
  return c.status==='resolved'?(c.capabilities.canReopen?'Hội thoại đã kết thúc. Mở lại để trả lời khách.':'Hội thoại đã kết thúc.'):'Nhận xử lý hoặc Tham gia hỗ trợ để trả lời khách.';
 }
-export function Composer({c,onSent}:{c:Conversation;onSent:()=>void}){
- const {session,principalId}=useChat();
+export function Composer({c,onSent,onRefresh}:{c:Conversation;onSent:(hasMessage?:boolean)=>void;onRefresh:()=>void}){
+ const {session,principalId}=useChat();const cache=useQueryClient();
  // Mở hội thoại luôn ở chế độ Trả lời khách, trừ khi draft đang dở ở chế độ ghi chú.
  const [draft,setLocal]=useState<Draft>(()=>getDraft(principalId,c.id));const [pending,setPending]=useState<Pending[]>([]);const sending=pending.some(p=>p.state==='sending');
  const area=useRef<HTMLTextAreaElement>(null);
@@ -39,12 +41,15 @@ export function Composer({c,onSent}:{c:Conversation;onSent:()=>void}){
   setPending(p=>[...p,item]);update({text:'',mode:draft.mode});
   try{
    const r=await sendMessage(session,c.id,{clientMessageId:item.clientMessageId,text:item.text,visibility});
-   if(r.kind==='sent'||r.kind==='accepted'){setPending(p=>p.filter(x=>x.clientMessageId!==item.clientMessageId));onSent();}
+   if(r.kind==='sent'||r.kind==='accepted'){
+    if(r.kind==='sent')await addSentMessage(cache,r.message);
+    setPending(p=>p.filter(x=>x.clientMessageId!==item.clientMessageId));onSent(r.kind==='sent'&&Boolean(cache.getQueryData(messageKey(c.id))));
+   }
    else if(r.kind==='unknown')setPending(p=>p.map(x=>x.clientMessageId===item.clientMessageId?{...x,state:'unknown'}:x));
    else{setPending(p=>p.filter(x=>x.clientMessageId!==item.clientMessageId));restore(item.text,visibility);toast.error('Tin không gửi được. Nội dung đã được trả lại ô soạn để bạn sửa và gửi lại.');}
   }catch(e){
    setPending(p=>p.filter(x=>x.clientMessageId!==item.clientMessageId));restore(item.text,visibility);
-   const err=chatError(e);toast.error(err.message,{description:err.correlationId?`Mã tra cứu: ${err.correlationId}`:undefined});if(err.action==='refetch'||err.action==='retry')onSent();
+   const err=chatError(e);toast.error(err.message,{description:err.correlationId?`Mã tra cứu: ${err.correlationId}`:undefined});if(err.action==='refetch'||err.action==='retry')onRefresh();
   }
  }
  function restore(text:string,mode:Draft['mode']){const current=getDraft(principalId,c.id);update({text:current.text?`${text}\n${current.text}`:text,mode});area.current?.focus();}

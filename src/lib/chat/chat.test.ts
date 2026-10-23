@@ -74,6 +74,17 @@ describe('ChatRealtime',()=>{
   ws().drop();await vi.advanceTimersByTimeAsync(1999);expect(s.call).toHaveBeenCalledTimes(2);await vi.advanceTimersByTimeAsync(1);expect(s.call).toHaveBeenCalledTimes(3);});
  it('đóng 4401 → bỏ token cũ rồi kết nối lại ngay',async()=>{const {ws,s}=await setup();ws().open();ws().frame({type:'ready',cursor:'c0'});ws().frame({type:'session.expired'});ws().drop(4401);expect(s.invalidate).toHaveBeenCalled();await vi.advanceTimersByTimeAsync(0);expect(s.call).toHaveBeenCalledTimes(2);});
  it('đóng 4403 → dừng hẳn, không reconnect',async()=>{const err=vi.spyOn(console,'error').mockImplementation(()=>{});const {ws,s,rt}=await setup();ws().open();ws().drop(4403);await vi.advanceTimersByTimeAsync(60000);expect(s.call).toHaveBeenCalledTimes(1);expect(rt.status).toBe('failed');err.mockRestore();});
+ it('socket không trả ready → timeout, thử ticket mới; socket cũ không còn được áp',async()=>{
+  const {ws,s,rt,h}=await setup();const old=ws();old.open();await vi.advanceTimersByTimeAsync(15000);expect(rt.status).toBe('offline');
+  await vi.advanceTimersByTimeAsync(1000);expect(s.call).toHaveBeenCalledTimes(2);old.frame({type:'ready',cursor:'stale'});expect(h.onReady).not.toHaveBeenCalled();
+  ws().open();ws().frame({type:'ready',cursor:'fresh'});expect(rt.cursor).toBe('fresh');await vi.advanceTimersByTimeAsync(15000);expect(s.call).toHaveBeenCalledTimes(2);rt.stop();
+ });
+ it('ticket request treo → abort và reconnect; stop hủy lần đang chờ',async()=>{
+  const signals:AbortSignal[]=[];const s={base:'https://gw',call:vi.fn(async(_m:string,_p:string,_b:unknown,o:{signal:AbortSignal})=>{signals.push(o.signal);return new Promise(()=>{});})};
+  const rt=new ChatRealtime(s as unknown as ChatSession,{onEvents:vi.fn(),onSync:vi.fn()},{random:()=>1});rt.start();
+  await vi.advanceTimersByTimeAsync(16000);expect(s.call).toHaveBeenCalledTimes(2);expect(signals[0].aborted).toBe(true);rt.stop();expect(signals[1].aborted).toBe(true);
+  await vi.advanceTimersByTimeAsync(60000);expect(s.call).toHaveBeenCalledTimes(2);
+ });
  it('sync.required → tải lại snapshot; mất kết nối >10 giây → offline',async()=>{const {ws,h,rt}=await setup();ws().open();ws().frame({type:'ready',cursor:'c0'});ws().frame({type:'sync.required',cursor:'c5'});expect(h.onSync).toHaveBeenCalled();expect(rt.cursor).toBe('c5');
   ws().drop();expect(rt.status).toBe('reconnecting');await vi.advanceTimersByTimeAsync(10000);expect(rt.status).toBe('offline');});
  it('403 khi xin ticket → dừng và báo mất quyền',async()=>{FakeWS.all=[];const s={base:'https://gw',call:vi.fn(async()=>{throw new ChatError(403,'FORBIDDEN');}),invalidate:vi.fn()};const h={onEvents:vi.fn(),onSync:vi.fn(),onForbidden:vi.fn()};const rt=new ChatRealtime(s as unknown as ChatSession,h,{WebSocket:FakeWS as unknown as typeof WebSocket});rt.start();await vi.advanceTimersByTimeAsync(0);expect(h.onForbidden).toHaveBeenCalled();expect(rt.status).toBe('stopped');expect(FakeWS.all).toEqual([]);});

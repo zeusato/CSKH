@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "history loads before WS ready and in parallel with conversation metadata",
+    "ready reconciles the initial HTTP/socket gap",
+    "events during an in-flight snapshot coalesce into one trailing refresh without losing messages",
+    "newest messages display while older history is blocked; loaded pages are retained and not refetched",
+    "201 response renders without a history read; realtime echo does not duplicate it",
+    "background refresh failure preserves messages and can be retried"
+  ],
+  "measurements": {
+    "incomingWithHistoryBlockedMs": 29,
+    "confirmedPostToBubbleMs": 38
+  },
+  "backend": "fully mocked; timings demonstrate client behavior only, not production latency",
+  "checkedAt": "2026-10-23T17:14:29.354Z"
+}

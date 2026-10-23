@@ -71,8 +71,9 @@ Bundle frontend không được chứa `BEGIN PRIVATE KEY`, `CHAT_ADMIN_KEY` hay
 - **Pool:** tab Chưa nhận / Của tôi / Đang có người chăm sóc / Chờ khách / Đã xong. Tìm STK là so khớp đúng cả chuỗi. Gateway không có API đếm: chỉ hiện số chưa đọc của các dòng đã tải và nút "Còn nữa".
 - **Người chăm sóc:** badge trên mỗi dòng và banner cố định đầu hội thoại. Nhận đồng thời: chỉ một người thắng, người kia thấy thông báo và nút Tham gia hỗ trợ.
 - **Tin nhắn:** plain text, tự nhận link `http/https`, mở tab mới với `noopener noreferrer`. Không render HTML. Ghi chú nội bộ nền vàng, khách không thấy. Khách chỉ thấy tên "CSKH SHS".
-- **Gửi tin:** mỗi tin có `clientMessageId` riêng; mạng rớt thì gửi lại đúng id. Kết quả chưa rõ (`unknown`) không tự gửi lại mà nhắc kiểm tra lịch sử. Bị từ chối (`rejected`) thì trả nội dung về ô soạn.
-- **Realtime:** chờ `ready` trước rồi mới tải dữ liệu; reconnect có backoff, gửi cursor cuối để Gateway trả bù event; dừng hẳn khi đóng 4403. Mất kết nối quá 10 giây thì hiện chip cảnh báo.
+- **Gửi tin:** mỗi tin có `clientMessageId` riêng; mạng rớt thì gửi lại đúng id. Response chứa Message được ghép ngay vào cache, không chờ tải lại lịch sử. Kết quả chưa rõ (`unknown`) không tự gửi lại mà nhắc kiểm tra lịch sử. Bị từ chối (`rejected`) thì trả nội dung về ô soạn.
+- **Tải tin:** metadata và lịch sử chạy song song. Mỗi lần cập nhật chỉ đọc 19 tin mới nhất; trang tin cũ lấy 50 tin khi cuộn lên. Giữ lịch sử đã tải khi hai cửa sổ còn giao nhau; nếu mất kết nối lâu đến mức có khoảng trống thì lấy cursor của cửa sổ mới để cuộn lại không bỏ sót tin.
+- **Realtime:** HTTP bắt đầu ngay khi có phiên, song song với kết nối socket. Khi nhận `ready`, đối soát snapshot lần nữa để khép khoảng trống giữa HTTP và socket. Event đến trong lúc HTTP đang chạy được gom thành một lượt tải tiếp, không liên tục hủy request. Tin mới tải ngay; danh sách/metadata gom 200 ms. Reconnect có backoff, gửi cursor cuối để Gateway trả bù event; dừng hẳn khi đóng 4403. Mất kết nối quá 10 giây thì hiện chip cảnh báo; xin ticket/handshake quá 15 giây thì hủy và thử lại.
 - **Phiên:** gia hạn trước hạn, single-flight; 401 gia hạn một lần; 403 thì dừng và báo mất quyền. Đăng xuất thu hồi phiên Gateway, đóng socket, xóa draft và cache.
 - **Thông báo:** badge chưa đọc trên menu và tiền tố `(N)` trên tiêu đề tab (Của tôi + Chưa nhận). Âm báo khi có hội thoại mới, bật/tắt ở đầu trang Chat (lưu theo thiết bị).
 
@@ -84,6 +85,7 @@ Bundle frontend không được chứa `BEGIN PRIVATE KEY`, `CHAT_ADMIN_KEY` hay
 | `npm run test:chat-db` | Migration 024 trên PostgreSQL cô lập (PGlite) |
 | `npm run test:chat-gateway` | Kịch bản nghiệm thu CHAT-PLAN §8.2 với Gateway local thật |
 | `npm run test:chat-ui` | Trình duyệt headless: hai nhân viên + người chỉ xem với Gateway local thật, Supabase giả lập |
+| `npm run test:chat-latency` | Kiểm thử HTTP/WS giả lập: bỏ chờ socket/metadata, event trong lúc tải, tin mới khi lịch sử cũ đang chậm, hiển thị response gửi ngay, chống trùng và giữ dữ liệu khi refresh lỗi. Báo cáo `docs/validation/chat-latency.json` |
 | `node scripts/test-chat-layout.mjs` | Kiểm tra bố cục desktop/tablet/phone, ô soạn tự giãn, giữ nháp, menu và chuyển trang; HTTP/WebSocket đều giả lập. Dùng cùng biến Playwright/URL bên dưới. Báo cáo `docs/validation/chat-layout.json` |
 
 ### Kiểm thử với Gateway local
@@ -100,5 +102,7 @@ npm run test:chat-ui
 ```
 
 `test:chat-ui` cần dev server (`npm run dev`) và Playwright (`PLAYWRIGHT_MODULE`, `CARE_BROWSER_PATH` như các bộ UI test khác). Ảnh chụp nằm ở `.local/chat-qa/`. Các test chỉ dùng persona tổng hợp, không nhắn tới khách thật, và gỡ đăng ký nhân viên test sau khi chạy.
+
+Rà soát và sửa độ trễ phía CSKH ngày 24/10/2026: [kết quả và giới hạn](validation/chat-latency.md). Thay đổi frontend và Edge Function `chat-session` cần triển khai riêng; các phép đo giả lập không phải benchmark production.
 
 Chưa kiểm với Supabase thật: `admin-users` và `chat-session` chỉ được chạy trong Node với Supabase giả lập. Sau khi deploy, kiểm tay theo mục Cấu hình bước 5 và kịch bản §8.2 trên PoC (cần GW-06).
