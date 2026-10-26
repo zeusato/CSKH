@@ -3,7 +3,7 @@
 Phân hệ riêng tại `/chat`. Tin khách gửi từ SHOne đi qua Chat Gateway (repo `zeusato/Chat-server`) và đổ vào một pool chung `support-default`. Nhân viên CSKH được phân quyền đọc, nhận, trả lời, tham gia hỗ trợ và chuyển hội thoại cho nhau.
 
 - Kế hoạch và quyết định: [CHAT-PLAN.md](CHAT-PLAN.md).
-- Hợp đồng Gateway (chép từ Chat-server commit `ce1d50b`): [chat-gateway/integration-guide.md](chat-gateway/integration-guide.md), [chat-gateway/openapi.yaml](chat-gateway/openapi.yaml). Khi Chat-server ra bản mới thì chép lại cả hai file và đối chiếu `src/lib/chat/contract.ts`.
+- Hợp đồng Gateway (đồng bộ từ thay đổi local Chat-server26/10 về public keepalive; chưa deploy): [chat-gateway/integration-guide.md](chat-gateway/integration-guide.md), [chat-gateway/openapi.yaml](chat-gateway/openapi.yaml). Khi Chat-server ra bản mới thì chép lại cả hai file và đối chiếu `src/lib/chat/contract.ts`.
 
 ## Kiến trúc
 
@@ -106,3 +106,8 @@ npm run test:chat-ui
 Rà soát và sửa độ trễ phía CSKH ngày 24/10/2026: [kết quả và giới hạn](validation/chat-latency.md). Thay đổi frontend và Edge Function `chat-session` cần triển khai riêng; các phép đo giả lập không phải benchmark production.
 
 Chưa kiểm với Supabase thật: `admin-users` và `chat-session` chỉ được chạy trong Node với Supabase giả lập. Sau khi deploy, kiểm tay theo mục Cấu hình bước 5 và kịch bản §8.2 trên PoC (cần GW-06).
+
+
+## Giữ ấm trước đăng nhập
+
+26/10/2026: đã code local vòng ping public ở entry, độc lập chat_module và phiên; chưa deploy. [Contract, cấu hình và giới hạn](chat-keepalive.md).

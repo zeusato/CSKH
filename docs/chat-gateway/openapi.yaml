@@ -25,6 +25,7 @@ tags:
   - name: queue
   - name: realtime
   - name: admin
+  - name: operations
 security:
   - chatSession: []
 paths:
@@ -39,6 +40,85 @@ paths:
           content:
             application/json:
               schema: { type: object, properties: { ok: { type: boolean, const: true } }, required: [ok] }
+  /wake:
+    get:
+      tags: [operations]
+      summary: Đánh thức chat trước đăng nhập
+      security: []
+      description: |
+        Public, không gửi cookie/Authorization/proof/body; không mở phiên hoặc cấp quyền chat.
+        Browser Origin phải thuộc ALLOWED_ORIGINS; native không Origin được phép. Origin không phải xác thực.
+        Dùng chung bộ đếm PostgreSQL 20 giây, lease và cache với /internal/warmup; không nhận URL upstream.
+        Upstream cố định Chatwoot GET /health. Response no-store, không lộ URL hoặc engineMs.
+        Bật mặc định khi ENGINE=chatwoot; CHAT_PUBLIC_WARMUP_ENABLED=false tắt riêng endpoint này.
+        Client ping khoảng 20 giây, không chồng request, timeout 60 giây; lỗi giãn 40/80/160/300 giây.
+      responses:
+        '200':
+          description: Probe health thành công hoặc dùng lại kết quả; không phải readiness DB/Redis/gửi tin
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, cached]
+                additionalProperties: false
+                properties:
+                  ok: { type: boolean, const: true }
+                  cached: { type: boolean }
+        '202':
+          description: Instance khác đang đánh thức, chưa có kết quả health
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, warming, retryAfterMs]
+                additionalProperties: false
+                properties:
+                  ok: { type: boolean, const: false }
+                  warming: { type: boolean, const: true }
+                  retryAfterMs: { type: integer, minimum: 1, maximum: 20000 }
+        '403': { $ref: '#/components/responses/Error', description: Browser Origin không được phép }
+        '404': { $ref: '#/components/responses/Error', description: Public wake tắt hoặc không có engine Chatwoot }
+        '503': { $ref: '#/components/responses/Error', description: Health hoặc phối hợp bộ đếm tạm lỗi }
+  /internal/warmup:
+    get:
+      tags: [operations]
+      summary: Giữ ấm Gateway và Chatwoot bằng khóa vận hành riêng
+      description: |
+        Chỉ server-to-server, mọi Origin đều bị từ chối. Tắt (404) nếu chưa cấu hình WARMUP_KEY_SHA256.
+        Gọi GET /health của Chatwoot v4.18.0 qua service binding, timeout 45 giây, không follow redirect.
+        Bộ đếm chung PostgreSQL chỉ cấp một lượt mỗi 20 giây từ lần cấp trước, kể cả lỗi.
+        Lease 50 giây chặn lượt đang chạy; trong một instance các request dùng chung promise/kết quả.
+        Cache nội bộ không đặt lại bộ đếm khi có request mới. Không xếp hàng gọi lại tự động.
+        Instance khác đang probe trả 202, không phải xác nhận engine đã sẵn sàng.
+        Chỉ kiểm liveness; không kiểm Redis/DB/Sidekiq và không gửi tin. Response Cache-Control no-store.
+      security: [{ warmupKey: [] }]
+      responses:
+        '200':
+          description: Chatwoot trả status woot hoặc dùng lại kết quả trong cửa sổ 20 giây
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, engineMs, cached]
+                properties:
+                  ok: { type: boolean, const: true }
+                  engineMs: { type: integer, minimum: 0, description: Thời gian HTTP của probe gốc; khi cached=true không phải phép đo mới }
+                  cached: { type: boolean, description: Dùng chung probe đang chạy hoặc kết quả đã lưu }
+        '202':
+          description: Instance khác đang giữ lượt probe; chưa có kết quả health
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, warming, retryAfterMs]
+                properties:
+                  ok: { type: boolean, const: false }
+                  warming: { type: boolean, const: true }
+                  retryAfterMs: { type: integer, minimum: 1, maximum: 20000 }
+        '401': { $ref: '#/components/responses/Error', description: Thiếu hoặc sai khóa warmup }
+        '403': { $ref: '#/components/responses/Error', description: Request có Origin }
+        '404': { $ref: '#/components/responses/Error', description: Endpoint chưa bật }
+        '503': { $ref: '#/components/responses/Error', description: Chatwoot timeout/health không hợp lệ hoặc lỗi DB phối hợp bộ đếm; lỗi cũng giữ bộ đếm }
   /sessions:
     post:
       tags: [session]
@@ -91,7 +171,7 @@ paths:
     get:
       tags: [conversation]
       summary: Hội thoại người gọi được đọc
-      description: Khách nhận hội thoại của chính mình. Nhân viên nhận mọi hội thoại support trong queue của mình (dùng `/queues/{queueId}/conversations` để lọc).
+      description: Khách nhận hội thoại của chính mình; với `advisory` chỉ hội thoại của môi giới hiện hành. Nhân viên nhận hội thoại support trong queue của mình (dùng `/queues/{queueId}/conversations` để lọc) và hội thoại advisory của phân công mình đang giữ. Cursor gắn với bộ lọc `kind`/`status`; đổi bộ lọc thì cursor cũ trả 400.
       parameters:
         - { name: kind, in: query, schema: { $ref: '#/components/schemas/ConversationKind' } }
         - { name: status, in: query, schema: { $ref: '#/components/schemas/ConversationStatus' } }
@@ -239,7 +319,7 @@ paths:
     get:
       tags: [queue]
       summary: Đồng nghiệp nhận chuyển giao được
-      description: Agent/supervisor active của queue, đã mở chat ít nhất một lần. Không gồm observer. Chỉ agent/supervisor gọi được.
+      description: Nhân viên đã đăng ký, active, đúng tenant và queue, role agent/supervisor. Không cần đăng nhập Chat trước hoặc online; không gồm observer/fixture ở môi trường tích hợp thật. ID là principal ID. API chuyển kiểm cùng điều kiện. Chỉ agent/supervisor gọi được.
       responses:
         '200':
           description: Danh sách
@@ -397,6 +477,10 @@ paths:
         '404': { $ref: '#/components/responses/Error' }
 components:
   securitySchemes:
+    warmupKey:
+      type: http
+      scheme: bearer
+      description: Khóa ngẫu nhiên riêng cho warmup, lưu ở GitHub Actions secret. Không dùng admin key/chat token, không giao frontend.
     chatSession:
       type: http
       scheme: bearer
@@ -481,7 +565,7 @@ components:
       required: [id, displayName]
       properties:
         id: { type: string, description: 'Phía khách: ID chung 00000000-0000-0000-0000-000000000000 cho mọi nhân viên' }
-        displayName: { type: string, description: 'Phía khách: luôn là tên chung (mặc định "CSKH SHS")' }
+        displayName: { type: string, description: 'Phía khách: kênh support là tên chung (mặc định "CSKH SHS"); kênh advisory là tên riêng của môi giới' }
     Conversation:
       type: object
       required: [id, kind, accountRef, subject, status, owner, revision, unreadCount, updatedAt, syncState, needsReview, capabilities]

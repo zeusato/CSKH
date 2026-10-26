@@ -21,7 +21,7 @@ Trong máy Windows hiện tại, nếu shim `npm.ps1` lỗi, dùng:
 
 ## Cấu hình
 
-Sao chép `.env.example` thành `.env`. Chỉ `VITE_SUPABASE_URL` và `VITE_SUPABASE_ANON_KEY` được phép vào frontend. Service-role key, Management token và mật khẩu PostgreSQL chỉ dùng bởi script/Edge Functions; không đặt tiền tố `VITE_` cho chúng.
+Sao chép `.env.example` thành `.env`. `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_CHAT_GATEWAY_URL` và `VITE_CHAT_KEEPALIVE_ENABLED` là cấu hình public được phép vào frontend. Service-role key, Management token và mật khẩu PostgreSQL chỉ dùng bởi script/Edge Functions; không đặt tiền tố `VITE_` cho chúng.
 
 ```powershell
 npm run db:inspect
@@ -82,3 +82,6 @@ Backend đang dùng Supabase Auth, PostgreSQL, Storage và hai Edge Functions. P
 Xem [hướng dẫn vận hành](docs/OPERATIONS.md) và [kế hoạch](PLAN.md).
 
 Xem [kết quả kiểm thử và những phần còn cần khi đưa vào vận hành](docs/validation/README.md). Các chức năng đã kết nối Supabase thật; Admin chính thức đã có và tài khoản kiểm thử đã được xóa. SMTP, domain và nghiệm thu hiệu năng tải cao vẫn cần được hoàn tất trước rollout.
+
+
+Giữ ấm Chat Server trước login: [docs/chat-keepalive.md](docs/chat-keepalive.md). VITE_CHAT_GATEWAY_URL và VITE_CHAT_KEEPALIVE_ENABLED là cấu hình public bổ sung, không chứa secret.

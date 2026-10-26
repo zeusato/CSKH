@@ -30,6 +30,8 @@ Nhập các biến trong Environment Variables:
 | --- | --- | --- |
 | `VITE_SUPABASE_URL` | URL project từ `.env` hiện tại | Có |
 | `VITE_SUPABASE_ANON_KEY` | Anon key hoặc publishable key từ `.env` | Có |
+| `VITE_CHAT_GATEWAY_URL` | Gateway public, mặc định `https://chat-server-poc.vercel.app/v1/chat` | Không |
+| `VITE_CHAT_KEEPALIVE_ENABLED` | `false` tắt ping trước login; mặc định bật | Không |
 | `SITE_URL` | URL gốc HTTPS của domain chính, ví dụ `https://cskh.example.com` | Chỉ cần khi muốn chỉ định domain |
 
 Hai biến `VITE_` là cấu hình công khai của trình duyệt; không dùng service-role key hoặc secret key ở đây. `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `DATABASE_URL` và thông tin bootstrap giữ trên máy quản trị/Supabase, không nhập vào frontend Vercel. Build sẽ chặn khi thiếu cấu hình hoặc phát hiện khóa đặc quyền đặt nhầm vào trường anon key.

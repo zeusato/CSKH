@@ -1,5 +1,7 @@
 # Hướng dẫn tích hợp SHS Chat Gateway
 
+Cập nhật vận hành 26/10/2026: frontend/native dùng **GET /wake** trước login, không cookie/Authorization/proof, theo OpenAPI. 200 `{ok:true,cached:boolean}` hoặc202 `{ok:false,warming:true,retryAfterMs}`; không dùng làm readiness chat. Ping20giây/timeout60giây, không chồng, lỗi giãn40/80/160/300giây, không UI/log lỗi. Origin web cần `ALLOWED_ORIGINS`; native không Origin được phép. Gateway gộp qua bộ đếm DB20giây. `GET /internal/warmup` vẫn chỉ dành cho GitHub runner/server có khóa riêng; frontend không giữ khóa. `/health` chỉ kiểm Gateway. Đã code local cả bốn repo, chưa deploy; quy trình ở `docs/operations-warmup.md`.
+
 Dành cho dev của nền tảng muốn nối vào Chat Gateway: app/web của khách hoặc trang nhân viên. File này đọc độc lập được khi chép sang repo khác. Đi kèm [`openapi.yaml`](openapi.yaml) là spec REST máy đọc được (import vào Postman, Swagger UI, hoặc sinh client).
 
 - Nguồn: repo `zeusato/Chat-server`, commit `ce1d50b` (23/10/2026). Khi có bản mới, lấy lại cả hai file.
@@ -42,7 +44,8 @@ Dành cho dev của nền tảng muốn nối vào Chat Gateway: app/web của k
   - **Khách hàng** (`customer`): được nhận diện theo STK mà backend nền tảng đã xác thực và ký. Tự tạo hội thoại và nhắn tin.
   - **Nhân viên** (`staff`): danh tính do trang nhân viên ký; **vai trò và queue lấy từ sổ đăng ký** của Gateway, không lấy từ token.
 - **Tenant** là biên dữ liệu: mọi nền tảng của cùng một tổ chức dùng chung tenant (SHS là `shs`). Cùng một STK ở hai tenant là hai khách khác nhau.
-- **Khách luôn thấy tên chung** cho nhân viên (mặc định `"CSKH SHS"`) và một ID chung cố định. Nhân viên thấy tên thật của nhau.
+- **Khách luôn thấy ID chung** cố định cho nhân viên. Ở kênh CSKH (`support`) tên cũng là tên chung (mặc định `"CSKH SHS"`); ở kênh môi giới (`advisory`) khách thấy **tên riêng của môi giới** (D31). Nhân viên thấy tên thật của nhau.
+- **Kênh môi giới quản lý** (`advisory`): môi giới định danh bằng **broker ID** (`remNo`, D35). Phân công lấy từ claim `advisors` trong assertion khách; app môi giới không gửi danh sách khách. Xem §5.5 và §6.4.
 - **Tin nhắn chỉ là plain text.** Không có HTML, Markdown, ảnh hay file.
 
 Base path: `/v1/chat`. Mọi ví dụ dưới đây viết `G = https://<gateway-host>/v1/chat`.
@@ -56,6 +59,7 @@ Gửi cho người quản trị Gateway:
 | Tên issuer | `shone-app`, `cskh-desk` | Cố định, duy nhất. Không bắt đầu bằng `fixture:` |
 | Loại người dùng nền tảng được phát | `customer` hoặc `staff` | App khách chỉ được `customer`; trang nhân viên chỉ được `staff` |
 | Public key Ed25519 | `{ "kid": "2026-10", "x": "<base64url 32 byte>" }` | **Chỉ public key.** Private key ở lại backend của bạn |
+| Cờ kênh môi giới (tùy chọn) | `assertsAdvisors: true` hoặc `"optional"` lúc chuyển tiếp (issuer khách), `advisorDirectory: true` (issuer môi giới) | Xem §5.5, §6.4. Mỗi tenant tối đa một issuer `advisorDirectory` |
 | Danh sách origin của web | `https://app.example.vn`, `https://staging.example.vn`, `http://127.0.0.1:5173` | Request có `Origin` ngoài danh sách bị 403. URL preview đổi theo từng deploy sẽ bị chặn nếu không được thêm |
 
 Trang nhân viên nhận thêm từ quản trị Gateway một **admin key** của tenant, để đồng bộ sổ nhân viên (§6.1). Admin key chỉ đặt ở server, không bao giờ vào frontend.
@@ -85,6 +89,7 @@ Header: `{"alg":"EdDSA","typ":"JWT","kid":"<kid>"}`.
 | `kind` | `"customer"` | `"staff"` | Phải nằm trong loại issuer được phát |
 | `name` | ✓ | ✓ | Tên thật, ≤200 ký tự. Nhân viên thấy tên khách lấy từ claim này |
 | `account_refs` | ✓ (≥1) | ✗ | Mảng STK dạng **chuỗi** (giữ số 0 đầu, ≤64 ký tự) mà backend đã xác thực thuộc người dùng |
+| `advisors` | issuer `assertsAdvisors: true`: ✓; `"optional"`: tùy chọn | ✗ | Mảng `{account_ref, advisor_ref, advisor_name}`, tối đa một phần tử mỗi STK. `advisor_ref` = broker ID (`remNo`), Gateway chuẩn hóa trim + chữ hoa, phải khớp `[A-Z0-9._-]{1,64}`. Không có môi giới thì gửi `[]`, **không bỏ claim**. Issuer không khai cờ mà gửi claim thì bị từ chối |
 | `sid` | ✓ | ✓ | ID phiên đăng nhập ở nền tảng (dùng làm tham chiếu) |
 | `sid_exp` | ✓ | ✓ | Hạn phiên đăng nhập, **giây** epoch. Phiên chat không dài hơn mốc này |
 | `jti` | ✓ | ✓ | Nonce ngẫu nhiên ≤128 ký tự. Mỗi assertion chỉ dùng được **một lần** |
@@ -264,6 +269,26 @@ Phía khách:
 - `GET {G}/conversations/{id}/messages?limit=50` trả **mới nhất trước**. Tải thêm tin cũ bằng `cursor` khi cuộn lên; đảo thứ tự khi hiển thị.
 - Chỉ gọi `POST {G}/conversations/{id}/read {lastReadMessageId}` khi tab đang hiển thị, hội thoại đang mở và tin cuối thực sự nằm trong vùng nhìn thấy. Mở panel chưa đủ coi là đã đọc. Mốc đọc chỉ tăng, không lùi.
 
+### 5.5. Kênh môi giới quản lý
+
+Chỉ áp dụng khi issuer khách được khai `assertsAdvisors` (`true`, hoặc `"optional"` trong lúc chuyển tiếp).
+
+Thứ tự bật không gián đoạn kênh CSKH:
+1. Gateway: `shone-app` đặt `"assertsAdvisors": "optional"` rồi redeploy. Assertion cũ (chưa có claim) và mới (có claim) đều được nhận.
+2. SHOne deploy bản ký claim `advisors` và bật cờ phía SHOne.
+3. Khi mọi phiên khách đã mang claim, Gateway đổi sang `"assertsAdvisors": true` rồi redeploy. Từ đây thiếu claim là bị từ chối, để "không có môi giới" luôn được nói rõ bằng `[]`.
+
+Rollback: đặt lại `"optional"` (hoặc bỏ cờ nếu SHOne cũng tắt claim).
+
+- Backend ký `advisors` từ dữ liệu tài khoản đã xác thực (SHOne: `account/information.remNo/remName`). Không nhận mã môi giới từ client.
+- Mỗi lần tạo phiên, Gateway đồng bộ phân công theo `iat`. Assertion cũ hơn lần trước bị bỏ qua.
+  - Cùng broker ID: giữ hội thoại hiện tại.
+  - Đổi hoặc mất môi giới: hội thoại môi giới cũ chuyển `resolved`, kèm event `conversation.updated` có `payload.reason = "advisor_changed"`. Khách không gửi/mở lại được hội thoại đó.
+- `POST /conversations {kind:"advisory"}` trả hội thoại chưa đóng của môi giới hiện hành nếu đã có (một thread mỗi môi giới). Không có môi giới thì trả 409 `ADVISOR_UNASSIGNED`.
+- `GET /conversations?kind=advisory` chỉ trả hội thoại của môi giới hiện hành. Khách không cần xem lịch sử với môi giới cũ (D36).
+- `owner.displayName` và `sender.displayName` là tên riêng của môi giới; `id` vẫn là ID chung.
+- Khách nhắn được ngay cả khi môi giới chưa từng đăng nhập. Hội thoại tự gán cho môi giới khi họ vào lần đầu (event `conversation.assigned`).
+
 ## 6. Luồng trang nhân viên
 
 ### 6.1. Đăng ký nhân viên (server-to-server)
@@ -285,7 +310,9 @@ GET    {G}/admin/staff                        → { items: StaffRegistration[] }
 | `supervisor` | Như agent, cộng thêm các thao tác đó trên **mọi** hội thoại trong queue, và thêm/gỡ người hỗ trợ cho người khác |
 | `observer` | **Chỉ xem:** pool, lịch sử (kể cả ghi chú nội bộ), event. Mọi thao tác trả 403 |
 
-- Đổi vai trò có hiệu lực ngay ở request kế tiếp, không cần nhân viên đăng nhập lại.
+- PUT tạo/cập nhật registration và principal trong cùng transaction theo (tenant,issuer,subject), giữ nguyên principal ID khi sync lặp hoặc đăng nhập lần đầu. Migration0005 backfill registration cũ thiếu principal. Agent engine được provision lúc đăng nhập hoặc assignment, có lease chống trùng và credential mã hóa.
+- Đổi tên/vai trò/queue có hiệu lực ngay ở request kế tiếp, không cần nhân viên đăng nhập lại.
+- DELETE cũng khóa được principal staff cũ thiếu registration; chỉ404 nếu cả hai không tồn tại. Khóa principal tăng auth_epoch và thu hồi mọi chat session; ticket/socket bị từ chối ở lần kiểm quyền kế tiếp.
 - Gọi `DELETE` (hủy đăng ký) khi khóa tài khoản hoặc gỡ quyền chat. Nếu `DELETE` lỗi phải báo rõ cho quản trị, vì nhân viên đó vẫn mở được phiên mới. Phiên đang mở tự hết hạn sau tối đa 5 phút.
 - Lớp chặn thứ hai: backend trang nhân viên **từ chối ký assertion** cho người không còn quyền.
 
@@ -325,9 +352,16 @@ Mọi thao tác đổi trạng thái gửi `expectedRevision` = `revision` của
 | Ô ghi chú nội bộ | `canAddNote` | `POST /conversations/{id}/messages {…, visibility:"internal"}` |
 
 - **Nhận đồng thời:** Gateway bảo đảm chỉ một người thắng. Người thua nhận 409 `ALREADY_CLAIMED`. UI tải lại và mời "Tham gia hỗ trợ", không báo lỗi đỏ.
-- **Danh sách người nhận chuyển:** `GET {G}/queues/{queueId}/members` → `{ items: [{ id, displayName, roles }] }`, bỏ chính mình. Chỉ có đồng nghiệp **đã mở chat ít nhất một lần**; người chưa từng đăng nhập chưa có ID ở Gateway. `targetPrincipalId` là `id` trong danh sách này, **không phải** ID tài khoản ở nền tảng của bạn.
+- **Danh sách người nhận chuyển:** `GET {G}/queues/{queueId}/members` → `{ items: [{ id, displayName, roles }] }`, bỏ chính mình. Gồm nhân viên **đã được đồng bộ/đăng ký**, active, đúng tenant/queue và có vai trò agent hoặc supervisor; không phụ thuộc đã đăng nhập, đang online hoặc đã có Agent engine. Fixture không xuất hiện trong môi trường tích hợp thật. Mở lại dialog chuyển phải tải mới danh sách, không dùng cache60giây hoặc yêu cầu đồng nghiệp vào Chat. `targetPrincipalId` là `id` trong danh sách này, **không phải** ID tài khoản ở nền tảng của bạn.
 - Sau khi chuyển, người chuyển mất quyền trả lời trừ khi "Tham gia hỗ trợ" lại.
 - Nhân viên khác vẫn thấy tên thật của người gửi. Khách thấy tên chung, nên nhắc nhân viên không cần ký tên cá nhân trong tin.
+
+### 6.4. App môi giới (issuer `advisorDirectory`)
+
+- `sub` của assertion staff **là broker ID** (`remNo`), cùng mã mà app khách ký trong `advisors`. Gateway chuẩn hóa trim + chữ hoa; sai định dạng thì 401.
+- Lần đăng nhập đầu, Gateway tự đăng ký môi giới với **đúng một vai trò `advisor`**, không queue (D32). Admin vẫn disable được qua `DELETE /admin/staff/{issuer}/{subject}`. Hồ sơ đã disable không tự bật lại.
+- Môi giới thấy hội thoại qua `GET /conversations?kind=advisory`: chỉ khách mà phân công hiện hành trỏ tới. Đổi môi giới thì người cũ mất quyền ngay ở mọi đường HTTP/WS/event.
+- Không gửi danh sách khách lên Gateway. Mọi quan hệ đến từ assertion của app khách.
 
 ## 7. Realtime (WebSocket)
 
@@ -352,7 +386,7 @@ Event chỉ chứa metadata, **không có nội dung tin**. Nhận event thì g�
 |---|---|---|
 | `message.created` | `{messageId, visibility}` | Tải lại tin của hội thoại (trang mới nhất) và `unreadCount` |
 | `conversation.created` | `{kind}` | Thêm vào danh sách sau khi `GET /conversations/{id}` |
-| `conversation.updated` | `{status}` hoặc `{participantAdded, role}` / `{participantRemoved}` | Tải lại hội thoại. Event participant chỉ gửi cho nhân viên |
+| `conversation.updated` | `{status}`, `{syncState}`, hoặc `{participantAdded, role}` / `{participantRemoved}` | Tải lại hội thoại. `{syncState: "ready"}` báo hội thoại đã gửi tin được (sau khi tạo hoặc sau khi nhận/chuyển), `revision: null`. Event participant chỉ gửi cho nhân viên |
 | `conversation.assigned` | `{ownerId}` | Tải lại hội thoại. Khách nhận ID chung |
 | `conversation.read` | `{principalId, messageId}` | Cập nhật badge (đồng bộ giữa các tab) |
 
@@ -532,12 +566,15 @@ ASSERTION_ISSUERS='[<dòng JSON>]' ADMIN_KEY_HASHES='shs=<hash>' ALLOWED_ORIGINS
 
 **Phân trang trả 422 "cursor không hợp lệ"?** Đang dùng cursor của một bộ lọc hoặc tab khác. Đổi bộ lọc thì bắt đầu lại từ trang đầu.
 
-**Đồng nghiệp không có trong danh sách chuyển?** Danh sách chỉ gồm người đã mở chat ít nhất một lần, còn active, vai trò agent/supervisor. Người chỉ xem (`observer`) không nhận chuyển giao được.
+**Đồng nghiệp không có trong danh sách chuyển?** Kiểm tra đồng bộ PUT đã thành công, registration và principal active, đúng tenant/queue, vai trò agent/supervisor. Không cần người nhận mở Chat trước; worker tự provision Agent khi chuyển. Người chỉ xem (`observer`) không nhận chuyển giao được.
 
-**Khách thấy tên nhân viên?** Không. Mọi tin, người phụ trách và event phía khách dùng tên chung (mặc định "CSKH SHS") và một ID chung.
+**Khách thấy tên nhân viên?** Ở kênh CSKH: không, mọi tin, người phụ trách và event phía khách dùng tên chung (mặc định "CSKH SHS") và một ID chung. Ở kênh môi giới: thấy tên riêng của môi giới, ID vẫn là ID chung.
 
 **Gửi ảnh/file hoặc định dạng chữ?** Không hỗ trợ. Chỉ plain text; link do client tự nhận diện.
 
 **Có endpoint refresh token?** Chưa. Gia hạn bằng assertion mới → `POST /sessions`.
 
 **Lần gọi đầu trên PoC rất chậm?** Engine trên PoC ngủ sau vài phút không có traffic; lần đánh thức mất khoảng 20 giây. Hiện trạng thái "Đang kết nối…" và thử lại khi gặp 503 `retryable`.
+
+
+Bổ sung23/10 (R02): chuyển syncState ready/failed và event conversation.updated được commit cùng transaction; khi ghi event lỗi, state rollback để worker thử lại. Không tăng revision nghiệp vụ; payload chỉ metadata, client vẫn GET lại hội thoại. REST schema không đổi.

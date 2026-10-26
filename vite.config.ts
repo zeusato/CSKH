@@ -6,7 +6,7 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig(({mode})=>({
   plugins: [react(), tailwindcss(), siteMetadata({...loadEnv(mode,process.cwd(),'SITE_'),...process.env})],
-  envPrefix: ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'],
+  envPrefix: ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_CHAT_GATEWAY_URL', 'VITE_CHAT_KEEPALIVE_ENABLED'],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   optimizeDeps: { exclude: ['@jsquash/webp'] },
   worker: { format: 'es' },
