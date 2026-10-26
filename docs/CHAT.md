@@ -1,5 +1,7 @@
 # Chat khách hàng
 
+**Verified production 26/10/2026:** commit f2a99c3 Vercel READY, CI success. admin-users đã deploy qua Supabase dashboard, bundle khớp source đã kiểm thử. Browser admin xác nhận User/Account và form tạo user không còn Chat; không tạo/sửa tài khoản thật trong smoke. DB flag false, Gateway từ chối chat/warmup tập trung.
+
 **26/10/2026 — REQUIRED: tạm dừng toàn bộ Chat KH theo yêu cầu Đại ca.** `public.feature_flags.chat_module=false`; frontend thêm cờ triển khai opt-in `VITE_CHAT_MODULE_ENABLED=true` (hiện tắt). Khi tắt: không menu/route/provider, không cột Chat/nút đồng bộ/quyền Chat trong User, không tự cấp quyền trong Account, không hiện switch phân hệ khi rollout tắt. `admin-users` từ chối sync-chat và bỏ đồng bộ ngầm khi sửa/khóa/tạo tài khoản; giữ quyền đã lưu (hạ về read nếu đổi viewer để thỏa constraint). Khi bật lại phải đồng bộ toàn bộ trước khi cấp phiên. Ping chỉ bật khi `VITE_CHAT_KEEPALIVE_ENABLED=true`.
 
 Phân hệ riêng tại `/chat`. Tin khách gửi từ SHOne đi qua Chat Gateway (repo `zeusato/Chat-server`) và đổ vào một pool chung `support-default`. Nhân viên CSKH được phân quyền đọc, nhận, trả lời, tham gia hỗ trợ và chuyển hội thoại cho nhau.
