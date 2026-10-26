@@ -13,9 +13,12 @@ Deno.serve(async(req:Request)=>{
   const {data:auth,error:authError}=await service.auth.getUser(token);if(authError||!auth.user)return reply({error:'Phiên đăng nhập không hợp lệ.'},401);
   const {data:caller}=await service.from('app_users').select('role,active').eq('id',auth.user.id).single();
   if(!caller?.active||caller.role!=='admin')return reply({error:'Chỉ quản trị viên được thực hiện thao tác này.'},403);
+  const {data:chatFlag,error:chatFlagError}=await service.from('feature_flags').select('enabled').eq('key','chat_module').maybeSingle();
+  const chatEnabled=!chatFlagError&&chatFlag?.enabled===true;
   const gateway={gatewayUrl:Deno.env.get('CHAT_GATEWAY_URL')||'',adminKey:Deno.env.get('CHAT_ADMIN_KEY')||''};
   // Ghi DB trước, đồng bộ Gateway sau. Lỗi Gateway không làm hỏng response: chỉ ghi trạng thái để Admin bấm "Thử lại".
   async function syncChat(id:string,force=false){
+   if(!chatEnabled)return {chatSync:'skipped'};
    const {data:p,error}=await service.from('app_users').select(chatColumns).eq('id',id).single();if(error)throw error;
    if(!force&&!chatEntitled(p as ChatProfile)&&!p.chat_synced_at&&!p.chat_sync_error)return {chatSync:'skipped'};
    const result=gateway.gatewayUrl&&gateway.adminKey?await syncStaff(p as ChatProfile,gateway):{ok:false as const,revoke:!chatEntitled(p as ChatProfile),error:'Chưa cấu hình Chat Gateway'};
@@ -23,6 +26,8 @@ Deno.serve(async(req:Request)=>{
    return result.ok?{chatSync:'ok'}:{chatSync:'failed',chatSyncError:result.error,chatRevoke:result.revoke};
   }
   const body=await req.json();
+  if(!chatEnabled&&body.action==='sync-chat')return reply({error:'Phân hệ Chat đang tắt.',code:'CHAT_DISABLED'},403);
+  if(!chatEnabled)delete body.chat_access;
   if(body.action==='list'){
    const profiles=await service.from('app_users').select('*').order('name');if(profiles.error)throw profiles.error;
    const emails=new Map<string,string>();let page=1;
@@ -61,6 +66,7 @@ Deno.serve(async(req:Request)=>{
    if('chat_access'in body){if(!CHAT_ACCESS_VALUES.includes(body.chat_access))return reply({error:'Quyền Chat không hợp lệ.'},400);update.chat_access=body.chat_access;}
    if('name'in body){if(typeof body.name!=='string'||!body.name.trim()||body.name.length>160)return reply({error:'Tên không hợp lệ.'},400);update.name=body.name.trim();}
    if('role'in body){if(!['admin','user','viewer'].includes(body.role))return reply({error:'Vai trò không hợp lệ.'},400);update.role=body.role;}
+   if(!chatEnabled&&body.role==='viewer'&&!chatAccessAllowed('viewer',String(target.data.chat_access??'none')))update.chat_access='read';
    // Kiểm trước khi ghi để không lộ lỗi constraint viewer_chat_read_only.
    if(!chatAccessAllowed(String(update.role??target.data.role??''),String(update.chat_access??target.data.chat_access??'none')))return reply({error:viewerChatError},400);
    if('department_id'in body)update.department_id=body.department_id||null;

@@ -4,11 +4,11 @@ import {bundleFunctionSync} from '../../scripts/function-bundle.mjs';
 type Row=Record<string,unknown>&{id:string};
 const target='00000000-0000-0000-0000-000000000002';
 // Chạy đúng bản bundle sẽ deploy của admin-users, với Supabase và Chat Gateway giả.
-function api({row={},gateway=200,configured=true,registrations=[] as unknown[]}:{row?:Partial<Row>;gateway?:number;configured?:boolean;registrations?:unknown[]}={}){
+function api({row={},gateway=200,configured=true,chatEnabled=true,registrations=[] as unknown[]}:{row?:Partial<Row>;gateway?:number;configured?:boolean;chatEnabled?:boolean;registrations?:unknown[]}={}){
  let serve!:(req:Request)=>Promise<Response>;
  const rows=new Map<string,Row>([['admin-id',{id:'admin-id',name:'Admin',role:'admin',active:true,chat_access:'none'}],[target,{id:target,name:'Trần Thị B',role:'user',active:true,chat_access:'none',chat_synced_at:null,chat_sync_error:null,...row}]]);
  const writes:Row[]=[];
- const from=()=>({
+ const from=(table:string)=>table==='feature_flags'?{select:()=>({eq:()=>({maybeSingle:async()=>({data:{enabled:chatEnabled},error:null})})})}:({
   select:()=>{const all=Promise.resolve({data:[...rows.values()].filter(r=>r.id!=='admin-id'),error:null});return Object.assign(all,{eq:(_k:string,id:string)=>({single:async()=>({data:rows.get(id)??null,error:rows.get(id)?null:{message:'missing'}}),maybeSingle:async()=>({data:rows.get(id)??null})})});},
   update:(values:Row)=>({eq:async(_k:string,id:string)=>{writes.push({...values,id});Object.assign(rows.get(id)!,values);return {error:null};}}),
   insert:async(values:Row)=>{rows.set(values.id,{chat_synced_at:null,chat_sync_error:null,active:true,...values});return {error:null};},
@@ -36,4 +36,15 @@ describe('admin-users: quyền Chat',()=>{
  it('chưa cấu hình Gateway → ghi lỗi để Admin thấy, không giả vờ thành công',async()=>{const a=api({configured:false});expect((await a.request({action:'update',chat_access:'agent'})).body).toMatchObject({chatSync:'failed',chatSyncError:'Chưa cấu hình Chat Gateway'});expect(a.calls).toEqual([]);});
  it('sync-chat {all} đối soát hai chiều: PUT người có quyền, DELETE đăng ký mồ côi',async()=>{const reg=(subject:string)=>({issuer:'cskh-desk',subject,displayName:null,roles:['agent'],queueIds:['support-default'],status:'active',updatedAt:''});const a=api({row:{chat_access:'agent'},registrations:[reg(target),reg('deleted-user')]});const r=await a.request({action:'sync-chat',all:true});expect(r.body).toMatchObject({ok:true,synced:1,failed:0,orphansRemoved:1});expect(a.calls.map(c=>`${c.method} ${c.url.split('/').pop()}`)).toEqual(['GET staff',`PUT ${target}`,'DELETE deleted-user']);});
  it('sync-chat {id} luôn gọi Gateway để thử lại',async()=>{const a=api({row:{chat_access:'none',chat_sync_error:'Gateway HTTP 500'}});expect((await a.request({action:'sync-chat'})).body).toMatchObject({chatSync:'ok'});expect(a.calls[0].method).toBe('DELETE');expect(a.rows.get(target)!.chat_sync_error).toBeNull();});
+});
+
+it('paused chat blocks manual sync and lets ordinary account edits/locks proceed without Gateway',async()=>{
+ const a=api({chatEnabled:false,row:{chat_access:'agent',chat_synced_at:'2026-10-23T00:00:00Z'}});
+ for(const body of [{action:'sync-chat',all:true},{action:'sync-chat'}])expect((await a.request(body)).status).toBe(403);
+ expect((await a.request({action:'update',name:'Updated',chat_access:'supervisor'})).body).toMatchObject({ok:true,chatSync:'skipped'});
+ expect(a.rows.get(target)?.chat_access).toBe('agent');
+ expect((await a.request({action:'update',active:false})).status).toBe(200);
+ expect((await a.request({action:'update',role:'viewer'})).status).toBe(200);
+ expect(a.rows.get(target)).toMatchObject({active:false,role:'viewer',chat_access:'read'});
+ expect(a.calls).toEqual([]);
 });

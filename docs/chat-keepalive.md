@@ -1,5 +1,7 @@
 # Giữ ấm Chat Server trước đăng nhập — 26/10/2026
 
+**26/10/2026 — REQUIRED: tạm dừng toàn bộ Chat KH theo yêu cầu Đại ca.** Cờ keepalive trên Vercel production/preview/development đã false; adapter mặc định off, chỉ explicit true mới chạy. Tab cũ cần tải lại để ngừng timer; Gateway chặn mọi warmup từ client cũ.
+
 ## Rollout26/10/2026
 
 Feature commit bcda5ae đã push main; Vercel production dpl_GZynwKtLtGNgR7qx3jxeWBbr8Zwq READY tại https://cskhshs.vercel.app. CI40279559058success. Trang public và entry bundle đã kiểm chứa wake client; CORS Gateway cho đúng origin đã pass.
