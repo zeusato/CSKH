@@ -1,5 +1,12 @@
 # Giữ ấm Chat Server trước đăng nhập — 26/10/2026
 
+## Rollout26/10/2026
+
+Feature commit bcda5ae đã push main; Vercel production dpl_GZynwKtLtGNgR7qx3jxeWBbr8Zwq READY tại https://cskhshs.vercel.app. CI40279559058success. Trang public và entry bundle đã kiểm chứa wake client; CORS Gateway cho đúng origin đã pass.
+
+Server feature32535a1 đã deploy READY và public wake200. Đây là kiểm HTTP/bundle, chưa phải benchmark tải hoặc nghiệm thu gửi/nhận; cold start và Redis quota vẫn có giới hạn đã ghi. Các mốc local/chưa deploy bên dưới là lịch sử trước rollout.
+
+
 Đại ca yêu cầu mở ứng dụng là đánh thức chat, không phụ thuộc đăng nhập hoặc quyền chat. Đã code local, chưa deploy/đóng gói/phát hành.
 
 - GET https://chat-server-poc.vercel.app/v1/chat/wake ngay sau khi ứng dụng khởi động, sau đó khoảng mỗi20giây tính từ đầu lượt trước. Không chồng request; timeout60giây. Lỗi giãn40/80/160/300giây, tự hồi phục; không toast/log lỗi hoặc chặn render.
