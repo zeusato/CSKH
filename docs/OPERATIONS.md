@@ -2,6 +2,8 @@
 
 ## Phạm vi
 
+Khi chuyển về server công ty, dùng [hướng dẫn bàn giao CNTT](handoff/README.md). Quy trình tài khoản dưới đây mô tả Supabase Auth cũ. [Chuyển đổi HR/SSO](handoff/AUTH-HR.md).
+
 Phân hệ Nhật ký CSKH có bảng và quyền riêng, dùng chung danh mục hệ thống/phòng ban/nhân sự. Xem [hướng dẫn cấp quyền, sử dụng và import](CARE-LOGS.md), cùng [trạng thái nâng cấp thực tế](validation/care-logs.md). Nhật ký đã xử lý không tự xuất hiện trong thư viện ticket.
 
 CSKH tự ghi nhận và cập nhật trạng thái dựa trên trao đổi thực tế qua Zalo/các kênh nội bộ. Ứng dụng không tự lấy tin nhắn Zalo, không gửi thông báo cho bên xử lý, không xác nhận kết quả từ hệ thống ngoài, không tính SLA.
@@ -20,7 +22,7 @@ Supabase Dashboard → Authentication → Email/SMTP để cấu hình nhà cung
 
 ## Dọn ảnh
 
-- Xóa ticket hoặc ảnh sẽ ghi đường dẫn vào `private.storage_gc_jobs` trong cùng transaction xóa metadata.
+- Xóa metadata ảnh của ticket hoặc bài thư viện sẽ ghi path vào hàng đợi. `claim_storage_gc` kiểm cả hai bảng attachment và chỉ trả path để xóa khi hết tham chiếu.
 - `storage-cleanup` gọi Storage API để xóa object và xác nhận công việc; có retry/backoff khi Storage lỗi.
 - Lịch `cskh-storage-cleanup` chạy mỗi phút bằng pg_cron/pg_net. Token riêng của worker nằm trong Vault và secrets của Edge Functions, không nằm trong mã frontend.
 - Metadata upload dở quá 24 giờ được dọn. Object không còn metadata và đã tồn tại quá một giờ sẽ được đưa vào hàng đợi xóa; khoảng chờ bảo vệ upload đang hoàn tất.
@@ -51,10 +53,10 @@ Tham khảo [PostgreSQL: Row Security Policies](https://www.postgresql.org/docs/
 ## Cập nhật và sao lưu
 
 - Chạy migration trên staging trước. Không sửa nội dung file migration đã chạy; tạo file kế tiếp.
-- Khi triển khai Edge Functions, chạy `scripts/deploy-functions.mjs`; script đặt lại token worker trong cả Vault và Edge secrets.
+- Trên Supabase Cloud, khi triển khai toàn bộ Edge Functions, chạy `scripts/deploy-functions.mjs`; script đặt lại token worker trong cả Vault và Edge secrets.
 - Dùng backup/PITR phù hợp với gói Supabase của công ty. Backup database không thay thế bản sao object Storage; cần quy trình backup ảnh riêng nếu công ty yêu cầu khôi phục.
 - Xuất Excel là báo cáo theo bộ lọc và cutoff tạo ticket; không phải snapshot transaction khi nhiều người đang sửa/xóa đồng thời. Không xuất URL ký riêng tư vào file.
-- Kiểm tra Auth redirect URL và SMTP khi đổi domain. Chỉ đưa hai biến public vào cấu hình build frontend.
+- Kiểm tra Auth redirect URL và SMTP khi đổi domain. Các biến public dùng cho build frontend được liệt kê trong `.env.example`.
 
 ## Những phần cần quyết định khi đưa vào dùng chính thức
 

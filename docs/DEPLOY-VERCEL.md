@@ -2,6 +2,8 @@
 
 Frontend chạy trên Vercel; dữ liệu, tài khoản, ảnh và Edge Functions tiếp tục chạy trên Supabase hiện tại. Bộ icon và ảnh chia sẻ đã có sẵn trong `public/`, không cần chạy công cụ tạo ảnh khi deploy.
 
+Để tự vận hành cả backend trên server công ty, dùng [quy trình bàn giao nội bộ](handoff/README.md).
+
 ## 1. Push mã nguồn
 
 Yêu cầu Node 22; `.nvmrc` ghi phiên bản đã kiểm thử. Thư mục đã được khởi tạo Git với nhánh `main`. Tạo một repository riêng tư, trống trên dịch vụ Git, rồi chạy trong thư mục dự án:
@@ -16,7 +18,7 @@ git remote add origin <URL-REPOSITORY-CUA-BAN>
 git push -u origin main
 ```
 
-Lưu ý trên máy hiện tại: `.git` được tạo bởi tài khoản sandbox nên Git của tài khoản Windows có thể báo `dubious ownership`. Cần hoàn tất bước bàn giao chủ sở hữu thư mục `.git` trước khi chạy các lệnh Git thông thường; việc này đang chờ chủ máy cho phép. Không ảnh hưởng mã nguồn hoặc build Vercel.
+Kiểm tra `git remote -v` trước khi thêm origin. Với checkout đã có remote, dùng URL repo riêng mà CNTT chỉ định.
 
 Thay `<URL-REPOSITORY-CUA-BAN>` bằng URL thật. `.env`, `.local`, `node_modules`, `dist`, cấu hình Vercel cục bộ và khóa riêng đã được bỏ qua trong Git. `check:git` kiểm tra danh sách file sẽ được đưa lên Git và phát hiện các khóa đặc quyền đang cấu hình; không tự stage/commit. GitHub Actions tự chạy test, build và kiểm tra file với khóa giả công khai, không cần Supabase secret trong CI.
 
@@ -31,10 +33,11 @@ Nhập các biến trong Environment Variables:
 | `VITE_SUPABASE_URL` | URL project từ `.env` hiện tại | Có |
 | `VITE_SUPABASE_ANON_KEY` | Anon key hoặc publishable key từ `.env` | Có |
 | `VITE_CHAT_GATEWAY_URL` | Gateway public, mặc định `https://chat-server-poc.vercel.app/v1/chat` | Không |
-| `VITE_CHAT_KEEPALIVE_ENABLED` | `false` tắt ping trước login; mặc định bật | Không |
+| `VITE_CHAT_MODULE_ENABLED` | `true` cho phép rollout frontend, còn cần cờ DB và quyền Chat | Không, mặc định tắt |
+| `VITE_CHAT_KEEPALIVE_ENABLED` | Chỉ `true` mới ping trước login | Không, mặc định tắt |
 | `SITE_URL` | URL gốc HTTPS của domain chính, ví dụ `https://cskh.example.com` | Chỉ cần khi muốn chỉ định domain |
 
-Hai biến `VITE_` là cấu hình công khai của trình duyệt; không dùng service-role key hoặc secret key ở đây. `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `DATABASE_URL` và thông tin bootstrap giữ trên máy quản trị/Supabase, không nhập vào frontend Vercel. Build sẽ chặn khi thiếu cấu hình hoặc phát hiện khóa đặc quyền đặt nhầm vào trường anon key.
+Các biến `VITE_` là cấu hình công khai của trình duyệt; không dùng service-role key hoặc secret key ở đây. `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `DATABASE_URL` và thông tin bootstrap giữ trên máy quản trị/Supabase, không nhập vào frontend Vercel. Build sẽ chặn khi thiếu cấu hình hoặc phát hiện khóa đặc quyền đặt nhầm vào trường anon key.
 
 Nếu chưa có custom domain, để trống `SITE_URL` và bật **Automatically expose System Environment Variables**. Build lấy domain production từ Vercel để tạo canonical và URL OG tuyệt đối. Khi gắn domain riêng, đặt `SITE_URL` theo domain đó và redeploy. Biến môi trường chỉ có hiệu lực với lần build tiếp theo. Xem [Vite trên Vercel](https://vercel.com/docs/frameworks/frontend/vite) và [biến môi trường của framework](https://vercel.com/docs/environment-variables/framework-environment-variables).
 

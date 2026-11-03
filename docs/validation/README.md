@@ -1,6 +1,8 @@
 # Kết quả kiểm thử · 12/09/2026
 
-## Bản triển khai hiện tại
+## Bản triển khai tại thời điểm 12/09/2026
+
+Khi bàn giao, dùng [kết quả đối chiếu ngày 03/11/2026 và quy trình nghiệm thu](../handoff/README.md). Các số liệu bên dưới là lịch sử kiểm thử.
 
 Frontend React/Vite đã build và mở bằng production preview tại `http://127.0.0.1:4173`. Backend dùng project Supabase được cấu hình trong `.env`, region Singapore (`ap-southeast-1`). Đã áp dụng migration 001–016, triển khai `admin-users`, `storage-cleanup` và lịch dọn ảnh mỗi phút. Chưa phát hành frontend lên domain chính thức.
 

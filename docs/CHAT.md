@@ -25,10 +25,10 @@ Frontend gọi Gateway trực tiếp bằng access token 5 phút giữ trong RAM
 
 ## Bật/tắt phân hệ
 
-Cờ `chat_module` trong bảng `public.feature_flags` (migration 025), **mặc định tắt**. Admin bật/tắt ở đầu trang Tài khoản.
+Cờ `chat_module` trong bảng `public.feature_flags` (migration 025), **mặc định tắt**. Khi build có `VITE_CHAT_MODULE_ENABLED=true`, Admin bật/tắt ở đầu trang Tài khoản.
 
 - Tắt: menu Chat ẩn với mọi người (kể cả Admin và người đã được cấp quyền), `/chat` chuyển về trang Ticket, `chat-session` trả 403 `CHAT_DISABLED` nên không ai lấy được phiên mới. Người đang mở Chat bị đóng trong khoảng 1 phút (giao diện đọc lại cờ mỗi phút và khi quay lại tab), phiên Gateway bị thu hồi khi trang đóng phân hệ.
-- Khi tắt vẫn cấp quyền và đồng bộ sổ đăng ký được, để chuẩn bị trước khi mở cho người dùng.
+- Khi cờ DB tắt, `admin-users` bỏ qua cập nhật quyền Chat và trả 403 cho `sync-chat`. Khi bật lại, giới hạn truy cập trong lúc bật cờ và đối soát sổ đăng ký Gateway trước khi cho người dùng vào.
 - Chỉ Admin đổi được cờ (RLS); mọi tài khoản đang hoạt động được đọc. Mỗi lần đổi ghi `updated_at`, `updated_by`.
 
 ## Quyền
@@ -51,7 +51,7 @@ Cờ `chat_module` trong bảng `public.feature_flags` (migration 025), **mặc 
    - `npm run issuer:keygen -- issuer cskh-desk shs staff <kid>`: stdout là dòng JSON public, gửi cho người quản trị Gateway thêm vào `ASSERTION_ISSUERS`.
    - `npm run issuer:keygen -- admin shs`: stdout là `shs=<hash>` cho `ADMIN_KEY_HASHES`.
    - Gateway phải có origin production của CSKH trong `ALLOWED_ORIGINS` (GW-06).
-2. Chạy migration: `npm run db:migrate` (áp dụng `024_chat_access.sql`).
+2. Chạy migration đến `025_feature_flags.sql`. Function cũng đọc cờ `feature_flags.chat_module`.
 3. Đặt secret cho Edge Function. Khai báo trong `.env` rồi chạy `npm run deploy:chat-secrets`:
 
    | Biến | Ý nghĩa |
@@ -63,7 +63,7 @@ Cờ `chat_module` trong bảng `public.feature_flags` (migration 025), **mặc 
    | `CHAT_ALLOWED_ORIGINS` | Tùy chọn. Mặc định `APP_URL` + `http://127.0.0.1:5173` |
 
 4. Deploy function: `node --env-file=.env scripts/deploy-functions.mjs --functions-only` (gồm `chat-session`).
-5. Vào trang Tài khoản, cấp quyền Chat rồi bấm **Đồng bộ Chat**.
+5. Khi có quyết định mở lại Chat, bật rollout build và cờ DB trên môi trường cách ly, cấp quyền rồi **Đồng bộ Chat**. Xác minh sổ đăng ký trước khi mở cho nhân viên.
 
 Xoay khóa: Gateway thêm `kid` mới → đổi `CHAT_ASSERTION_KID` và file PEM rồi chạy lại `deploy:chat-secrets` → Gateway gỡ `kid` cũ.
 
@@ -114,4 +114,4 @@ Chưa kiểm với Supabase thật: `admin-users` và `chat-session` chỉ đư�
 
 ## Giữ ấm trước đăng nhập
 
-26/10/2026: đã code local vòng ping public ở entry, độc lập chat_module và phiên; chưa deploy. [Contract, cấu hình và giới hạn](chat-keepalive.md).
+Keepalive độc lập với phiên đăng nhập và chỉ chạy khi `VITE_CHAT_KEEPALIVE_ENABLED=true`. [Contract, lịch sử triển khai và giới hạn](chat-keepalive.md).

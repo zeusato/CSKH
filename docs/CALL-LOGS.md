@@ -1,6 +1,6 @@
 # Nhật ký cuộc gọi
 
-Phân hệ riêng tại `/call-logs`, dùng chung tài khoản, nhân sự và phòng ban. Không tự tạo ticket, Nhật ký CSKH hoặc bài thư viện. Migration 023 đã áp dụng lên Supabase production lúc 10:29:01 ngày 23/10/2026 (giờ Việt Nam). Edge Function admin-users đã triển khai và đối chiếu mã nguồn sau khi tải lại. Frontend vẫn ở máy local, sẵn sàng để phát hành; em chưa commit/push/deploy frontend.
+Phân hệ riêng tại `/call-logs`, dùng chung tài khoản, nhân sự và phòng ban. Không tự tạo ticket, Nhật ký CSKH hoặc bài thư viện. Migration 023 đã áp dụng lên Supabase production lúc 10:29:01 ngày 23/10/2026 (giờ Việt Nam). Edge Function admin-users đã triển khai và đối chiếu mã nguồn sau khi tải lại. Đây là mốc kiểm tra ngày 23/10. [Trạng thái khi bàn giao](handoff/README.md).
 
 ## Dữ liệu và nhập liệu
 
